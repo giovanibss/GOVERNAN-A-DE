@@ -603,43 +603,10 @@ function normalize(s) {
 
 function matchBathroomByHeader(header) {
   if (!header) return null;
-  const hNorm = normalize(header);
-  if (!hNorm) return null;
-
-  // 1) Tenta ID direto (B01, B02...)
-  const idMatch = header.match(/\bB\d{2}\b/i);
-  if (idMatch) {
-    const found = BATHROOMS_DEF.find(b => b.id.toUpperCase() === idMatch[0].toUpperCase());
-    if (found) return found;
-  }
-
-  // 2) Match por igualdade normalizada (ideal)
-  let exact = BATHROOMS_DEF.find(b => normalize(b.name) === hNorm);
-  if (exact) return exact;
-
-  // 3) Score baseado em palavras-chave
-  // Para cada banheiro, conta quantas palavras (>=3 chars) do nome aparecem no header.
-  // O melhor banheiro é o que tem MAIS palavras em comum E o MENOR número de palavras "sobrando".
-  let best = null, bestScore = -1;
-  BATHROOMS_DEF.forEach(b => {
-    const bWords = b.name.toLowerCase().split(/\s+/).filter(w => w.length >= 2).map(normalize);
-    const hWords = header.toLowerCase().split(/\s+/).filter(w => w.length >= 2).map(normalize);
-
-    let hits = 0;
-    bWords.forEach(bw => { if (hWords.includes(bw)) hits++; });
-
-    // Precisa de pelo menos metade das palavras do nome
-    if (hits < Math.ceil(bWords.length / 2)) return;
-
-    // Score: prioriza cobertura total e penaliza palavras extras
-    const coverage = hits / bWords.length;
-    const extra = hWords.length - hits;
-    const score = coverage * 100 - extra * 2;
-
-    if (score > bestScore) { bestScore = score; best = b; }
-  });
-
-  return best;
+  // Match simples e direto: procura B01..B12 no cabeçalho
+  const m = header.toString().match(/B\d{2}/i);
+  if (!m) return null;
+  return BATHROOMS_DEF.find(b => b.id.toUpperCase() === m[0].toUpperCase()) || null;
 }
 
 function parseCronograma(json) {
