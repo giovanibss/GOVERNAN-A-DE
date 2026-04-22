@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AFA · Monitor de Higiene — DE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy-900:#0a1628; --navy-800:#0f2341; --navy-700:#14315a;
+      --navy-600:#1e4377; --navy-500:#2d5a9e; --navy-400:#5b82c4;
+      --navy-300:#94b0d8; --navy-200:#c5d4e8; --navy-100:#e6eef7; --navy-50:#f2f6fb;
+      --gold-500:#d4a84b; --gold-400:#e6be65; --gold-300:#f0d487;
+      --green-500:#10b981; --green-400:#34d399;
+      --yellow-500:#f59e0b; --yellow-400:#fbbf24;
+      --red-500:#ef4444; --red-400:#f87171;
+      --gray-100:#f1f5f9; --gray-200:#e2e8f0; --gray-300:#cbd5e1;
+      --gray-400:#94a3b8; --gray-500:#64748b; --gray-700:#334155; --gray-900:#0f172a;
+      --white:#ffffff;
+      --font-display:'Oswald', sans-serif;
+      --font-body:'Inter', sans-serif;
+      --font-mono:'JetBrains Mono', monospace;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--navy-50);
+      color: var(--navy-900);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::after {
+      content:''; position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(20,49,90,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20,49,90,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, var(--navy-900), var(--navy-700));
+      color: white; padding: 0 2rem; height: 78px;
+      display:flex; align-items:center; justify-content:space-between;
+      position: sticky; top:0; z-index:100;
+      border-bottom: 3px solid var(--gold-500);
+    }
+    header::before {
+      content:''; position:absolute; inset:0;
+      background-image: repeating-linear-gradient(45deg, rgba(212,168,75,.05) 0 1px, transparent 1px 20px);
+      pointer-events:none;
+    }
+    .logo { display:flex; align-items:center; gap:1rem; position:relative; }
+
+    /* brasão da AFA */
+    .crest {
+      width: 58px; height: 58px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: white;
+      border-radius: 6px;
+      padding: 3px;
+      border: 2px solid var(--gold-500);
+      box-shadow: 0 3px 10px rgba(0,0,0,.3);
+    }
+    .crest img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size:1.15rem; font-weight:600;
+      letter-spacing:.04em; line-height:1; text-transform: uppercase;
+    }
+    .logo-sub {
+      font-size:.7rem; color: var(--navy-300);
+      letter-spacing:.08em; text-transform:uppercase; margin-top:4px;
+    }
+    .header-right { display:flex; align-items:center; gap:1rem; position:relative; }
+    .last-update {
+      font-family: var(--font-mono); font-size:.72rem;
+      color: var(--navy-200);
+      background: rgba(255,255,255,.08);
+      padding:.35rem .85rem; border-radius:4px;
+      border:1px solid rgba(255,255,255,.1);
+    }
+    .live-dot {
+      display:flex; align-items:center; gap:.4rem;
+      font-size:.72rem; color: var(--green-400);
+      font-weight:500; letter-spacing:.05em; text-transform:uppercase;
+    }
+    .pulse {
+      width:8px; height:8px; background:var(--green-400); border-radius:50%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 10px var(--green-400);
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+    .refresh-btn, .form-btn {
+      display:flex; align-items:center; gap:.45rem;
+      font-size:.72rem; font-weight:500; color:white;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:4px; padding:.4rem .8rem;
+      cursor:pointer; text-transform:uppercase;
+      letter-spacing:.05em; transition: all .2s;
+      font-family: var(--font-body);
+      text-decoration: none;
+    }
+    .refresh-btn:hover, .form-btn:hover { background: rgba(255,255,255,.15); }
+    .refresh-btn.spinning svg { animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .form-btn {
+      background: var(--gold-500); color: var(--navy-900);
+      border-color: var(--gold-500); font-weight: 600;
+    }
+    .form-btn:hover { background: var(--gold-400); }
+
+    /* ══ COCAR FAB ICON ══ */
+    .cocar-icon {
+      width: 18px; height: 18px;
+      flex-shrink: 0;
+      object-fit: contain;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,.2));
+    }
+    .cocar-icon.lg {
+      width: 28px; height: 28px;
+    }
+    .cocar-icon.xl {
+      width: 44px; height: 44px;
+    }
+
+    /* BANNER */
+    #status-banner {
+      display:none; padding:.6rem 2rem; font-size:.8rem; font-weight:500;
+      align-items:center; gap:.6rem; position:relative; z-index:5;
+    }
+    #status-banner.loading { display:flex; background:#dbeafe; color:#1e3a8a; }
+    #status-banner.error   { display:flex; background:#fef2f2; color:#991b1b; }
+
+    /* SUMMARY */
+    .summary {
+      display:flex; gap:.75rem; padding:1.25rem 2rem;
+      background:white; border-bottom:1px solid var(--navy-100);
+      overflow-x:auto; position:relative; z-index:5;
+    }
+    .summary-card {
+      flex:0 0 auto; display:flex; align-items:center; gap:.75rem;
+      background: var(--navy-50); border:1px solid var(--navy-100);
+      border-left:3px solid; border-radius:4px;
+      padding:.6rem 1.1rem; min-width:130px;
+    }
+    .summary-card.green  { border-left-color: var(--green-500); }
+    .summary-card.yellow { border-left-color: var(--yellow-500); }
+    .summary-card.red    { border-left-color: var(--red-500); }
+    .summary-card.gray   { border-left-color: var(--gray-400); }
+    .summary-card.gold   { border-left-color: var(--gold-500); margin-left:auto; }
+    .summary-count {
+      font-family: var(--font-display);
+      font-size:1.5rem; font-weight:600; line-height:1; color: var(--navy-900);
+    }
+    .summary-label {
+      font-size:.65rem; color: var(--gray-500);
+      text-transform:uppercase; letter-spacing:.08em;
+      font-weight:500; margin-top:2px;
+    }
+
+    /* MAIN */
+    main {
+      display:grid; grid-template-columns:1fr 340px; gap:1.5rem;
+      padding:1.5rem 2rem; max-width:1500px; margin:0 auto;
+      position:relative; z-index:5;
+    }
+    @media(max-width:960px){ main{grid-template-columns:1fr;} }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size:.72rem; font-weight:500;
+      text-transform:uppercase; letter-spacing:.12em;
+      color: var(--navy-600); margin-bottom:1rem;
+      display:flex; align-items:center; gap:.5rem;
+    }
+    .section-title::before {
+      content:''; width:16px; height:2px; background: var(--gold-500);
+    }
+
+    /* ══ 3 BLOCKS CONTAINER ══ */
+    .blocks-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .blocks-wrap > .block-card:nth-child(1) { grid-column: 1; grid-row: 1; }
+    .blocks-wrap > .block-card:nth-child(2) { grid-column: 2; grid-row: 1; }
+    .blocks-wrap > .block-card:nth-child(3) { grid-column: 1 / -1; grid-row: 2; }
+
+    @media(max-width:640px){
+      .blocks-wrap { grid-template-columns: 1fr; }
+      .blocks-wrap > .block-card:nth-child(1),
+      .blocks-wrap > .block-card:nth-child(2),
+      .blocks-wrap > .block-card:nth-child(3) { grid-column: 1; grid-row: auto; }
+    }
+
+    .block-card {
+      background: linear-gradient(180deg, white 0%, var(--navy-50) 100%);
+      border:1px solid var(--navy-100);
+      border-radius:10px;
+      padding:1.25rem;
+      position:relative;
+      overflow:hidden;
+      border-top: 3px solid var(--navy-600);
+    }
+
+    /* subtle aeronautical pattern on each card */
+    .block-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 80px; height: 80px;
+      background-image: repeating-linear-gradient(45deg, rgba(45,90,158,.04) 0 1px, transparent 1px 10px);
+      border-radius: 0 10px 0 100%;
+      pointer-events: none;
+    }
+
+    .block-header {
+      display: flex; align-items: center;
+      gap: .6rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .block-badge {
+      background: var(--navy-900);
+      color: var(--gold-400);
+      padding: .3rem .6rem;
+      border-radius: 4px;
+      font-family: var(--font-display);
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      display: flex; align-items: center; gap: .35rem;
+    }
+    .block-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem; font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--navy-900);
+      flex: 1;
+    }
+    .block-count {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      color: var(--gray-500);
+      background: var(--navy-50);
+      padding: .2rem .5rem;
+      border-radius: 4px;
+      border: 1px solid var(--navy-100);
+    }
+
+    /* BLOCK SVG - isometric scene */
+    .block-scene {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: .5rem 0;
+    }
+    .block-scene svg {
+      width: 100%;
+      max-width: 380px;
+      height: auto;
+      display: block;
+    }
+    .block-scene svg .cube { cursor: pointer; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+    .block-scene svg .cube {
+      animation: float 4s ease-in-out infinite;
+      transform-box: fill-box; transform-origin: center;
+    }
+    .block-scene svg .cube:nth-child(2n) { animation-delay: -1.5s; }
+    .block-scene svg .cube:nth-child(3n) { animation-delay: -2.5s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-5px); }
+    }
+    .block-scene svg .cube:hover {
+      animation-play-state: paused;
+      transform: translateY(-8px) scale(1.05);
+    }
+    .block-scene svg .cube.selected .cube-top,
+    .block-scene svg .cube.selected .cube-left,
+    .block-scene svg .cube.selected .cube-right {
+      stroke: var(--gold-500) !important; stroke-width: 2.5 !important;
+    }
+
+    .legend {
+      display:flex; gap:1rem; flex-wrap:wrap;
+      justify-content: center;
+      padding: .75rem;
+      background: white;
+      border: 1px solid var(--navy-100);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .legend-item {
+      display:flex; align-items:center; gap:.35rem;
+      font-size:.65rem; color: var(--navy-700);
+      font-weight:500; text-transform:uppercase; letter-spacing:.05em;
+    }
+    .legend-dot { width:9px; height:9px; border-radius:50%; box-shadow: 0 0 6px currentColor; }
+
+    /* SIDEBAR */
+    .sidebar { display:flex; flex-direction:column; gap:1rem; }
+    .detail-panel, .bath-list {
+      background:white; border:1px solid var(--navy-100);
+      border-radius:8px; padding:1.25rem;
+      border-top:3px solid var(--navy-600);
+    }
+    .bath-list { border-top-color: var(--gold-500); }
+    .detail-empty { text-align:center; padding:2rem 1rem; color:var(--gray-400); font-size:.83rem; }
+
+    .detail-header { display:flex; align-items:center; gap:.75rem; margin-bottom:1rem; }
+    .detail-icon-wrap {
+      width:48px; height:48px; border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; border:2px solid;
+    }
+    .detail-icon-wrap.clean   { background: rgba(16,185,129,.15); border-color: var(--green-500); }
+    .detail-icon-wrap.warning { background: rgba(245,158,11,.15); border-color: var(--yellow-500); }
+    .detail-icon-wrap.dirty   { background: rgba(239,68,68,.15); border-color: var(--red-500); }
+    .detail-icon-wrap.no-data { background: var(--gray-100); border-color: var(--gray-400); }
+    .detail-name {
+      font-family: var(--font-display);
+      font-size:1.05rem; font-weight:600;
+      letter-spacing:.03em; text-transform:uppercase;
+      color: var(--navy-900);
+    }
+    .detail-loc {
+      font-size:.68rem; color: var(--gray-500);
+      letter-spacing:.04em; text-transform:uppercase; margin-top:2px;
+    }
+    .status-badge {
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.3rem .8rem; border-radius:4px;
+      font-size:.7rem; font-weight:600; margin-bottom:1rem;
+      text-transform:uppercase; letter-spacing:.08em;
+      font-family: var(--font-display);
+    }
+    .status-badge.clean   { background:rgba(16,185,129,.12); color:#047857; }
+    .status-badge.warning { background:rgba(245,158,11,.12); color:#92400e; }
+    .status-badge.dirty   { background:rgba(239,68,68,.12); color:#991b1b; }
+    .status-badge.no-data { background:var(--gray-100); color:var(--gray-500); }
+
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:.55rem; }
+    .info-item {
+      background: var(--navy-50); border:1px solid var(--navy-100);
+      border-radius:4px; padding:.75rem;
+    }
+    .info-item-label {
+      font-size:.6rem; color: var(--navy-500);
+      font-weight:600; text-transform:uppercase;
+      letter-spacing:.08em; margin-bottom:.25rem;
+    }
+    .info-item-value {
+      font-family: var(--font-display);
+      font-size:.95rem; font-weight:600; color: var(--navy-900);
+    }
+    .info-item-sub { font-size:.62rem; color:var(--gray-500); margin-top:1px; }
+
+    .timeline { margin-top:1rem; }
+    .tl-title {
+      font-family: var(--font-display);
+      font-size:.7rem; font-weight:500;
+      text-transform:uppercase; letter-spacing:.12em;
+      color: var(--navy-600); margin-bottom:.75rem;
+      display:flex; align-items:center; gap:.5rem;
+    }
+    .tl-title::before { content:''; width:16px; height:2px; background: var(--gold-500); }
+    .tl-item { display:flex; align-items:flex-start; gap:.7rem; padding-bottom:.75rem; position:relative; }
+    .tl-item::before {
+      content:''; position:absolute;
+      left:7px; top:16px; width:1px; height:100%;
+      background: var(--navy-100);
+    }
+    .tl-item:last-child::before { display:none; }
+    .tl-dot {
+      width:15px; height:15px; border-radius:50%;
+      flex-shrink:0; margin-top:2px; border:2px solid white;
+    }
+    .tl-dot.recent { background: var(--navy-600); box-shadow: 0 0 0 2px var(--navy-600); }
+    .tl-dot.old    { background: var(--gray-300); }
+    .tl-info { flex:1; }
+    .tl-time { font-family: var(--font-mono); font-size:.68rem; color:var(--gray-500); }
+    .tl-who  { font-size:.78rem; font-weight:500; color: var(--navy-800); }
+    .tl-empty { font-size:.78rem; color:var(--gray-400); font-style:italic; }
+
+    /* BATH LIST - uses cocar icon as button-style */
+    .bath-row {
+      display:flex; align-items:center; gap:.7rem;
+      padding:.6rem .5rem; border-radius:4px;
+      cursor:pointer; transition: all .15s;
+      border-left: 3px solid transparent;
+    }
+    .bath-row:hover  { background: var(--navy-50); }
+    .bath-row.active { background: var(--navy-100); border-left-color: var(--gold-500); padding-left:.4rem; }
+    .bath-row-cocar {
+      width: 22px; height: 22px;
+      flex-shrink: 0;
+      opacity: 0.4;
+      transition: opacity .15s, transform .15s;
+    }
+    .bath-row:hover .bath-row-cocar { opacity: 0.8; }
+    .bath-row.active .bath-row-cocar { opacity: 1; transform: scale(1.1); }
+    .bath-row-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; box-shadow:0 0 6px currentColor; }
+    .bath-row-name { font-size:.8rem; font-weight:500; flex:1; color: var(--navy-900); }
+    .bath-row-time { font-family: var(--font-mono); font-size:.65rem; color:var(--gray-500); }
+    .bath-sep { height:1px; background: var(--navy-100); margin:.2rem 0; }
+
+    /* Register CTA */
+    .register-cta {
+      background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+      color: var(--navy-900);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+      text-decoration: none;
+      border: 2px solid var(--gold-500);
+      transition: all .2s;
+      box-shadow: 0 4px 12px rgba(212,168,75,.3);
+    }
+    .register-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(212,168,75,.4); }
+    .register-cta-icon {
+      width:44px; height:44px; border-radius:8px;
+      background: var(--navy-900);
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+      padding: 6px;
+    }
+    .register-cta-icon img { width:100%; height:100%; object-fit:contain; }
+    .register-cta-text { flex:1; }
+    .register-cta-title {
+      font-family: var(--font-display);
+      font-size: .95rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .05em;
+      line-height: 1.1;
+    }
+    .register-cta-sub {
+      font-size: .68rem; color: var(--navy-800);
+      margin-top: 2px;
+      letter-spacing: .03em;
+    }
+    .register-cta-arrow { width: 20px; height: 20px; flex-shrink: 0; }
+
+    /* TOOLTIP */
+    .tooltip {
+      position:fixed; background:var(--navy-900); color:white;
+      font-size:.72rem; padding:.45rem .85rem; border-radius:4px;
+      border:1px solid var(--gold-500); pointer-events:none;
+      opacity:0; transition: opacity .15s;
+      z-index:999; white-space:nowrap; font-family: var(--font-mono);
+    }
+    .tooltip.show { opacity:1; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: .7rem;
+      color: var(--gray-500);
+      letter-spacing: .04em;
+      position: relative; z-index: 5;
+    }
+    footer .cocar-icon { display: inline-block; vertical-align: middle; margin: 0 .5rem; opacity: .5; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="crest">
+      <img src="assets/brasao-afa.jpg" alt="Brasão da AFA" />
+    </div>
+    <div>
+      <div class="logo-text">Academia da Força Aérea</div>
+      <div class="logo-sub">Divisão de Ensino · Higiene</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <a class="form-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSfPBxIMMMreVWbx0gffg9r4l2Q-_WRxn3n_on3SkHaRH9C1AA/viewform" target="_blank">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      Registrar Limpeza
+    </a>
+    <button class="refresh-btn" id="refresh-btn" onclick="fetchSheet()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+      </svg>
+      Atualizar
+    </button>
+    <span class="last-update" id="last-update">—</span>
+    <span class="live-dot"><span class="pulse"></span> Ao vivo</span>
+  </div>
+</header>
+
+<div id="status-banner"><span id="status-msg">Carregando dados…</span></div>
+
+<div class="summary" id="summary-bar">
+  <div class="summary-card gray"><div><div class="summary-count">—</div><div class="summary-label">Carregando</div></div></div>
+</div>
+
+<main>
+  <div>
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#10b981;color:#10b981"></div>Operacional</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;color:#f59e0b"></div>Atenção</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444;color:#ef4444"></div>Crítico</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;color:#94a3b8"></div>Sem Registro</div>
+    </div>
+
+    <!-- 3 BLOCKS -->
+    <div class="blocks-wrap">
+
+      <!-- CANTINA -->
+      <div class="block-card">
+        <div class="block-header">
+          <img src="assets/cocar-fab.png" class="cocar-icon lg" alt="" />
+          <div class="block-badge">Bloco A</div>
+          <div class="block-title">Cantina</div>
+          <div class="block-count" id="count-cantina">— / 2</div>
+        </div>
+        <div class="block-scene" id="scene-cantina"></div>
+      </div>
+
+      <!-- CINEMA -->
+      <div class="block-card">
+        <div class="block-header">
+          <img src="assets/cocar-fab.png" class="cocar-icon lg" alt="" />
+          <div class="block-badge">Bloco B</div>
+          <div class="block-title">Cinema</div>
+          <div class="block-count" id="count-cinema">— / 2</div>
+        </div>
+        <div class="block-scene" id="scene-cinema"></div>
+      </div>
+
+      <!-- PRÉDIO ADM -->
+      <div class="block-card">
+        <div class="block-header">
+          <img src="assets/cocar-fab.png" class="cocar-icon lg" alt="" />
+          <div class="block-badge">Bloco C</div>
+          <div class="block-title">Prédio Administrativo DE</div>
+          <div class="block-count" id="count-admin">— / 5</div>
+        </div>
+        <div class="block-scene" id="scene-admin"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <!-- CTA -->
+    <a class="register-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSfPBxIMMMreVWbx0gffg9r4l2Q-_WRxn3n_on3SkHaRH9C1AA/viewform" target="_blank">
+      <div class="register-cta-icon">
+        <img src="assets/cocar-fab.png" alt="" />
+      </div>
+      <div class="register-cta-text">
+        <div class="register-cta-title">Registrar Limpeza</div>
+        <div class="register-cta-sub">Abrir formulário de registro</div>
+      </div>
+      <svg class="register-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M7 17L17 7M17 7H9M17 7V15"/>
+      </svg>
+    </a>
+
+    <div class="detail-panel" id="detail-panel">
+      <div class="section-title">Detalhes da Instalação</div>
+      <div class="detail-empty" id="detail-empty">
+        <img src="assets/cocar-fab.png" class="cocar-icon xl" alt="" style="opacity:.3; margin-bottom:.75rem;" />
+        <div>Selecione um banheiro na planta</div>
+      </div>
+      <div id="detail-content" style="display:none"></div>
+    </div>
+    <div class="bath-list">
+      <div class="section-title">Todas as Instalações</div>
+      <div id="bath-list-items"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <img src="assets/cocar-fab.png" class="cocar-icon" alt="" />
+  Academia da Força Aérea · Divisão de Ensino
+  <img src="assets/cocar-fab.png" class="cocar-icon" alt="" />
+</footer>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+/* ── CONFIG ── */
+const SHEET_ID  = '1wFKX6eVRi1VOtcQH4Bb0xJ32saXAUw2FihIiHdw_-yc';
+const SHEET_URL = name => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+const REFRESH_MS = 60000;
+
+/* ── BATHROOMS BY BLOCK ──
+   Each block has its own SVG scene with local grid coordinates.
+   gx, gy are coordinates inside the block's own isometric plane.
+*/
+const BLOCKS = {
+  cantina: {
+    footprint: { w: 4, h: 6 },        // grid size
+    bathrooms: [
+      { id:'B01', name:'Cantina Fem',   shortName:'Fem',   icon:'🚺', location:'Cantina', gx:1, gy:1 },
+      { id:'B02', name:'Cantina Masc',  shortName:'Masc',  icon:'🚹', location:'Cantina', gx:1, gy:3 },
+    ]
+  },
+  cinema: {
+    footprint: { w: 6, h: 4 },
+    bathrooms: [
+      { id:'B03', name:'Cinema Fem',    shortName:'Fem',   icon:'🚺', location:'Cinema', gx:1, gy:1 },
+      { id:'B04', name:'Cinema Masc',   shortName:'Masc',  icon:'🚹', location:'Cinema', gx:3, gy:1 },
+    ]
+  },
+  admin: {
+    footprint: { w: 10, h: 5 },
+    bathrooms: [
+      { id:'B06', name:'Hall Central Masc', shortName:'Hall M', icon:'🚹', location:'Prédio Adm — Hall Central', gx:2, gy:1 },
+      { id:'B05', name:'Hall Central Fem',  shortName:'Hall F', icon:'🚺', location:'Prédio Adm — Hall Central', gx:2, gy:3 },
+      { id:'B07', name:'Corredor Of. Masc',   shortName:'Of M',   icon:'⭐', location:'Prédio Adm — Corredor',    gx:7, gy:1 },
+      { id:'B08', name:'Corredor Grad. Masc', shortName:'Grad M', icon:'🚹', location:'Prédio Adm — Corredor',    gx:7, gy:2 },
+      { id:'B09', name:'Corredor Fem',        shortName:'Fem',    icon:'🚺', location:'Prédio Adm — Corredor',    gx:7, gy:3 },
+    ]
+  },
+};
+
+// flat list of all bathrooms with default state
+const BATHROOMS_DEF = [
+  ...BLOCKS.cantina.bathrooms.map(b => ({ ...b, block: 'cantina' })),
+  ...BLOCKS.cinema.bathrooms.map(b  => ({ ...b, block: 'cinema'  })),
+  ...BLOCKS.admin.bathrooms.map(b   => ({ ...b, block: 'admin'   })),
+];
+
+let bathrooms = BATHROOMS_DEF.map(b => ({ ...b, status:'no-data', lastClean:null, cleaner:'—', history:[] }));
+let selected = null;
+
+function computeStatus(lastClean) {
+  if (!lastClean) return 'no-data';
+  const mins = (Date.now() - lastClean.getTime()) / 60000;
+  if (mins < 180) return 'clean';
+  if (mins < 300) return 'warning';
+  return 'dirty';
+}
+
+/* ── BUILD A BLOCK SVG ──
+   Each block is drawn as its own isometric scene:
+   1. Ground polygon (rhombus based on footprint)
+   2. Bathroom cubes
+*/
+function buildBlockSVG(blockKey, bathroomsData) {
+  const block = BLOCKS[blockKey];
+  const W = block.footprint.w;
+  const H = block.footprint.h;
+
+  // Cell size for this block — we scale to fit in ~360px wide
+  const CELL = 28;
+  const CUBE_W = 1.6, CUBE_H = 1.6, CUBE_Z = 26;
+
+  // Isometric projection
+  // origin placed so the whole footprint fits in the viewBox
+  // isometric bounds:
+  //   max_x = (W) * 0.866 * CELL
+  //   min_x = -(H) * 0.866 * CELL
+  //   width = (W+H) * 0.866 * CELL
+  //   height = (W+H) * 0.5 * CELL + CUBE_Z (for floating cubes)
+  const totalW = (W + H) * 0.866 * CELL;
+  const totalH = (W + H) * 0.5   * CELL + CUBE_Z + 20;
+  const ox = H * 0.866 * CELL + 10;   // shift so min_x = 0
+  const oy = 10 + CUBE_Z;              // top padding for cubes
+
+  function iso(gx, gy) {
+    return {
+      x: ox + (gx - gy) * 0.866 * CELL,
+      y: oy + (gx + gy) * 0.5   * CELL,
+    };
+  }
+
+  // ground polygon vertices
+  const g0 = iso(0, 0);
+  const g1 = iso(W, 0);
+  const g2 = iso(W, H);
+  const g3 = iso(0, H);
+
+  // cube rendering
+  function cubeSVG(gx, gy, status, icon, name, id) {
+    const A = iso(gx, gy), B = iso(gx+CUBE_W, gy), C = iso(gx+CUBE_W, gy+CUBE_H), D = iso(gx, gy+CUBE_H);
+    const At = {x:A.x, y:A.y-CUBE_Z}, Bt = {x:B.x, y:B.y-CUBE_Z}, Ct = {x:C.x, y:C.y-CUBE_Z}, Dt = {x:D.x, y:D.y-CUBE_Z};
+    const colors = {
+      clean:   { top:'rgba(16,185,129,.5)',  left:'rgba(16,185,129,.75)',  right:'rgba(16,185,129,.6)',  stroke:'#10b981' },
+      warning: { top:'rgba(245,158,11,.5)',  left:'rgba(245,158,11,.75)',  right:'rgba(245,158,11,.6)',  stroke:'#f59e0b' },
+      dirty:   { top:'rgba(239,68,68,.5)',   left:'rgba(239,68,68,.75)',   right:'rgba(239,68,68,.6)',   stroke:'#ef4444' },
+      'no-data': { top:'rgba(148,163,184,.4)', left:'rgba(148,163,184,.65)', right:'rgba(148,163,184,.55)', stroke:'#94a3b8' }
+    }[status];
+    const cx = (At.x + Ct.x) / 2;
+    const cy = (At.y + Ct.y) / 2;
+    return `
+      <g class="cube" id="cube-${id}" data-id="${id}">
+        <polygon class="cube-left"
+          points="${D.x},${D.y} ${Dt.x},${Dt.y} ${Ct.x},${Ct.y} ${C.x},${C.y}"
+          fill="${colors.left}" stroke="${colors.stroke}" stroke-width="1.5"/>
+        <polygon class="cube-right"
+          points="${C.x},${C.y} ${Ct.x},${Ct.y} ${Bt.x},${Bt.y} ${B.x},${B.y}"
+          fill="${colors.right}" stroke="${colors.stroke}" stroke-width="1.5"/>
+        <polygon class="cube-top"
+          points="${At.x},${At.y} ${Bt.x},${Bt.y} ${Ct.x},${Ct.y} ${Dt.x},${Dt.y}"
+          fill="${colors.top}" stroke="${colors.stroke}" stroke-width="1.5"/>
+        <circle cx="${At.x + 8}" cy="${At.y - 2}" r="4" fill="${colors.stroke}" opacity="0.95"/>
+        <text x="${cx}" y="${cy + 3}" font-size="16" text-anchor="middle" dominant-baseline="middle">${icon}</text>
+        <text x="${cx}" y="${cy + 18}" font-family="Oswald" font-size="8" font-weight="600"
+              fill="#0a1628" text-anchor="middle">${name.toUpperCase()}</text>
+      </g>
+    `;
+  }
+
+  // sort cubes by (gx+gy) ascending for correct z-order (painter's algorithm)
+  const sortedCubes = [...bathroomsData].sort((a,b) => (a.gx + a.gy) - (b.gx + b.gy));
+
+  const cubesHTML = sortedCubes.map(b =>
+    cubeSVG(b.gx, b.gy, b.status, b.icon, b.shortName, b.id)
+  ).join('');
+
+  return `
+    <svg viewBox="0 0 ${totalW + 20} ${totalH}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid-${blockKey}" width="18" height="18" patternUnits="userSpaceOnUse"
+                 patternTransform="matrix(0.866 0.5 -0.866 0.5 0 0)">
+          <path d="M 18 0 L 0 0 0 18" fill="none" stroke="rgba(45,90,158,.12)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <!-- ground plate -->
+      <polygon points="${g0.x},${g0.y} ${g1.x},${g1.y} ${g2.x},${g2.y} ${g3.x},${g3.y}"
+               fill="#e6eef7" stroke="#94b0d8" stroke-width="1.5"/>
+      <polygon points="${g0.x},${g0.y} ${g1.x},${g1.y} ${g2.x},${g2.y} ${g3.x},${g3.y}"
+               fill="url(#grid-${blockKey})"/>
+      <!-- cubes -->
+      ${cubesHTML}
+    </svg>
+  `;
+}
+
+/* ── FETCH SHEET ── */
+async function fetchSheet() {
+  setBanner('loading', 'Sincronizando com a planilha…');
+  setRefreshSpinning(true);
+
+  const sheetsToTry = ['Respostas', 'Respostas do formulário 1', 'Form Responses 1'];
+  let json = null;
+
+  for (const sheetName of sheetsToTry) {
+    try {
+      const res = await fetch(SHEET_URL(sheetName));
+      const text = await res.text();
+      const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+      if (!match) continue;
+      const candidate = JSON.parse(match[1]);
+      if (candidate?.status === 'error') continue;
+      json = candidate;
+      break;
+    } catch(e) {}
+  }
+
+  if (!json) {
+    setBanner('error', '⚠️ Não foi possível ler a planilha. Verifique se está pública e a aba está correta.');
+    setRefreshSpinning(false);
+    return;
+  }
+
+  try {
+    parseSheetData(json);
+    setBanner('');
+  } catch(e) {
+    setBanner('error', '⚠️ Erro ao processar os dados.');
+    console.error(e);
+  } finally {
+    setRefreshSpinning(false);
+    updateClock();
+  }
+}
+
+function parseSheetData(json) {
+  const rows = json?.table?.rows || [];
+  const histMap = {};
+  BATHROOMS_DEF.forEach(b => histMap[b.id] = []);
+
+  rows.forEach(row => {
+    const c = row.c || [];
+    const tsRaw = c[0]?.v;
+    const bathField = c[1]?.v?.toString() || '';
+    const who   = c[2]?.v || '—';
+    const obs   = c[3]?.v || '';
+    if (!bathField || !tsRaw) return;
+    const idMatch = bathField.match(/^(B\d{2})/i);
+    if (!idMatch) return;
+    const bid = idMatch[1].toUpperCase();
+    let dt;
+    if (typeof tsRaw === 'string') {
+      const m = tsRaw.match(/Date\((\d+),(\d+),(\d+),?(\d+)?,?(\d+)?,?(\d+)?\)/);
+      if (m) dt = new Date(+m[1], +m[2], +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+      else   dt = new Date(tsRaw);
+    } else if (typeof tsRaw === 'number') {
+      dt = new Date((tsRaw - 25569) * 86400000);
+    }
+    if (!dt || isNaN(dt)) return;
+    if (!histMap[bid]) return;
+    histMap[bid].push({ time: dt, who, label: obs || 'Limpeza registrada' });
+  });
+
+  bathrooms = BATHROOMS_DEF.map(def => {
+    const hist = (histMap[def.id] || []).sort((a,b) => b.time - a.time);
+    const last = hist[0] || null;
+    return {
+      ...def,
+      status:    computeStatus(last?.time || null),
+      lastClean: last?.time || null,
+      cleaner:   last?.who  || '—',
+      history:   hist.slice(0,5),
+    };
+  });
+  renderAll();
+}
+
+/* ── RENDER ── */
+function renderAll() {
+  buildSummary();
+  buildAllBlocks();
+  buildList();
+  if (selected) renderDetail(bathrooms.find(b => b.id === selected));
+}
+
+function buildSummary() {
+  const c = { clean:0, warning:0, dirty:0, 'no-data':0 };
+  bathrooms.forEach(b => c[b.status]++);
+  document.getElementById('summary-bar').innerHTML = `
+    <div class="summary-card green"><div><div class="summary-count">${c.clean}</div><div class="summary-label">Operacionais</div></div></div>
+    <div class="summary-card yellow"><div><div class="summary-count">${c.warning}</div><div class="summary-label">Atenção</div></div></div>
+    <div class="summary-card red"><div><div class="summary-count">${c.dirty}</div><div class="summary-label">Críticos</div></div></div>
+    <div class="summary-card gray"><div><div class="summary-count">${c['no-data']}</div><div class="summary-label">Sem Registro</div></div></div>
+    <div class="summary-card gold"><div><div class="summary-count">${bathrooms.length}</div><div class="summary-label">Total</div></div></div>
+  `;
+}
+
+function buildAllBlocks() {
+  ['cantina', 'cinema', 'admin'].forEach(blockKey => {
+    const baths = bathrooms.filter(b => b.block === blockKey);
+    const ok = baths.filter(b => b.status === 'clean').length;
+    document.getElementById(`count-${blockKey}`).textContent = `${ok} / ${baths.length}`;
+    document.getElementById(`scene-${blockKey}`).innerHTML = buildBlockSVG(blockKey, baths);
+
+    // Attach listeners
+    baths.forEach(b => {
+      const el = document.getElementById(`cube-${b.id}`);
+      if (!el) return;
+      if (selected === b.id) el.classList.add('selected');
+      el.addEventListener('click', () => selectBath(b.id));
+      el.addEventListener('mouseenter', e => showTip(e, b));
+      el.addEventListener('mouseleave', hideTip);
+    });
+  });
+}
+
+function buildList() {
+  document.getElementById('bath-list-items').innerHTML =
+    bathrooms.map((b,i) => `
+      ${i ? '<div class="bath-sep"></div>' : ''}
+      <div class="bath-row${selected===b.id?' active':''}" id="row-${b.id}" onclick="selectBath('${b.id}')">
+        <img src="assets/cocar-fab.png" class="bath-row-cocar" alt="" />
+        <span class="bath-row-dot" style="background:${statusColor(b.status)}; color:${statusColor(b.status)}"></span>
+        <span class="bath-row-name">${b.name}</span>
+        <span class="bath-row-time">${b.lastClean ? fmt(b.lastClean) : '—'}</span>
+      </div>
+    `).join('');
+}
+
+function selectBath(id) {
+  if (selected) {
+    document.getElementById(`cube-${selected}`)?.classList.remove('selected');
+    document.getElementById(`row-${selected}`)?.classList.remove('active');
+  }
+  selected = id;
+  document.getElementById(`cube-${id}`)?.classList.add('selected');
+  document.getElementById(`row-${id}`)?.classList.add('active');
+  renderDetail(bathrooms.find(b => b.id === id));
+}
+
+function renderDetail(b) {
+  document.getElementById('detail-empty').style.display = 'none';
+  const cont = document.getElementById('detail-content');
+  cont.style.display = 'block';
+  const histHtml = b.history.length
+    ? b.history.map((h,i) => `
+        <div class="tl-item">
+          <div class="tl-dot ${i===0?'recent':'old'}"></div>
+          <div class="tl-info">
+            <div class="tl-who">${h.who} <span style="font-weight:400;color:var(--gray-500)">· ${h.label}</span></div>
+            <div class="tl-time">${fmt(h.time)} · ${fmtAgo(h.time)}</div>
+          </div>
+        </div>`).join('')
+    : '<div class="tl-empty">Nenhum registro encontrado para esta instalação.</div>';
+
+  cont.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-icon-wrap ${b.status}">${b.icon}</div>
+      <div><div class="detail-name">${b.name}</div><div class="detail-loc">${b.location}</div></div>
+    </div>
+    <span class="status-badge ${b.status}">
+      <span style="width:6px;height:6px;border-radius:50%;background:${statusColor(b.status)};display:inline-block"></span>
+      ${statusLabel(b.status)}
+    </span>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-item-label">Última Limpeza</div>
+        <div class="info-item-value">${b.lastClean ? fmt(b.lastClean) : '—'}</div>
+        <div class="info-item-sub">${b.lastClean ? fmtAgo(b.lastClean) : 'Sem registro'}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-item-label">Próxima Prev.</div>
+        <div class="info-item-value">${b.lastClean ? fmt(new Date(b.lastClean.getTime() + 5*60*60*1000)) : '—'}</div>
+        <div class="info-item-sub">${b.lastClean ? fmtNext(new Date(b.lastClean.getTime() + 5*60*60*1000)) : '—'}</div>
+      </div>
+      <div class="info-item" style="grid-column:1/-1">
+        <div class="info-item-label">Responsável</div>
+        <div class="info-item-value">${b.cleaner}</div>
+      </div>
+    </div>
+    <div class="timeline">
+      <div class="tl-title">Histórico de Operações</div>
+      ${histHtml}
+    </div>
+  `;
+}
+
+/* ── HELPERS ── */
+const statusLabel = s => ({ clean:'Operacional', warning:'Atenção', dirty:'Requer Limpeza', 'no-data':'Sem Registro' }[s] || '—');
+const statusColor = s => ({ clean:'#10b981', warning:'#f59e0b', dirty:'#ef4444', 'no-data':'#94a3b8' }[s] || '#94a3b8');
+const fmt     = d => d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const fmtAgo  = d => { const m=Math.round((Date.now()-d)/60000); return m<1?'agora mesmo':m<60?`${m} min atrás`:`${Math.floor(m/60)}h ${m%60}min atrás`; };
+const fmtNext = d => { const m=Math.round((d-Date.now())/60000); if(m<0) return `Atrasado ${Math.abs(m)} min`; return m<60?`em ${m} min`:`em ${Math.floor(m/60)}h ${m%60}min`; };
+
+function setBanner(type, msg='') {
+  const el = document.getElementById('status-banner');
+  el.className = type || '';
+  document.getElementById('status-msg').textContent = msg;
+  if (!type) el.style.display = 'none';
+}
+function setRefreshSpinning(on) { document.getElementById('refresh-btn').classList.toggle('spinning', on); }
+function updateClock() {
+  document.getElementById('last-update').textContent =
+    'ATUALIZADO ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+/* TOOLTIP */
+const tip = document.getElementById('tooltip');
+function showTip(e,b){ tip.textContent = `${b.name} · ${statusLabel(b.status)}${b.lastClean?' · '+fmtAgo(b.lastClean):''}`; tip.classList.add('show'); }
+function hideTip(){ tip.classList.remove('show'); }
+document.addEventListener('mousemove', e => { tip.style.left = (e.clientX+14)+'px'; tip.style.top = (e.clientY-32)+'px'; });
+
+/* INIT */
+fetchSheet();
+setInterval(fetchSheet, REFRESH_MS);
+setInterval(updateClock, 1000);
+</script>
+</body>
+</html>
