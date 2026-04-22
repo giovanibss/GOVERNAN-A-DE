@@ -611,86 +611,72 @@ function matchBathroomByHeader(header) {
 
 function parseCronograma(json) {
   const cols = json?.table?.cols || [];
-  let rows = json?.table?.rows || [];
+  const rows = json?.table?.rows || [];
   if (!rows.length) {
     console.warn('[cronograma] Nenhuma linha encontrada');
     return [];
   }
 
-  // ═══ MONTAR MAPA DE CABEÇALHOS ═══
-  // O gviz pode colocar os headers em cols[i].label OU na primeira linha (rows[0])
-  // Vamos tentar ambos e usar o que tiver mais matches
+  // ═══ ESTRUTURA REAL DA ABA cronograma ═══
+  // Linha 1 (cols[i].label): IDs "B01", "B02"... na coluna C em diante
+  // Linha 2 (rows[0]):       Nomes descritivos (CANTINA FEM, etc.) - ignorar
+  // Linha 3+ (rows[1+]):     dados. Coluna A = dia, B = horário, C..N = tipo
+  //                          IMPORTANTE: coluna A só é preenchida na PRIMEIRA linha
+  //                          de cada dia; nas demais fica vazia (herda o dia anterior)
 
-  const headerToId_fromCols = {};
+  // 1) Mapear colunas por ID nos cabeçalhos (cols[i].label)
+  const headerToId = {};
   for (let i = 2; i < cols.length; i++) {
-    const label = cols[i]?.label || '';
-    const match = matchBathroomByHeader(label);
-    if (match) {
-      headerToId_fromCols[i] = match.id;
-      console.log(`[cronograma cols] col ${i} "${label}" → ${match.id} (${match.name})`);
-    } else if (label) {
-      console.warn(`[cronograma cols] col ${i} "${label}" → SEM MATCH`);
-    }
-  }
-
-  // Se a primeira linha parecer ser cabeçalho (contém textos tipo "CANTINA", "HALL", etc),
-  // vamos ler de lá também
-  const headerToId_fromFirstRow = {};
-  const firstRow = rows[0]?.c || [];
-  let firstRowLooksLikeHeader = false;
-  const firstRowHints = ['cantina', 'cinema', 'hall', 'corredor', 'banheiro'];
-  for (let i = 2; i < firstRow.length; i++) {
-    const val = (firstRow[i]?.v || '').toString().toLowerCase();
-    if (firstRowHints.some(h => val.includes(h))) {
-      firstRowLooksLikeHeader = true;
-      break;
-    }
-  }
-
-  if (firstRowLooksLikeHeader) {
-    for (let i = 2; i < firstRow.length; i++) {
-      const label = (firstRow[i]?.v || '').toString();
-      const match = matchBathroomByHeader(label);
-      if (match) {
-        headerToId_fromFirstRow[i] = match.id;
-        console.log(`[cronograma row0] col ${i} "${label}" → ${match.id} (${match.name})`);
-      } else if (label) {
-        console.warn(`[cronograma row0] col ${i} "${label}" → SEM MATCH`);
+    const label = (cols[i]?.label || '').toString();
+    const m = label.match(/B\d{2}/i);
+    if (m) {
+      const id = m[0].toUpperCase();
+      const found = BATHROOMS_DEF.find(b => b.id.toUpperCase() === id);
+      if (found) {
+        headerToId[i] = found.id;
+        console.log(`[cronograma] col ${i} (label="${label}") → ${found.id}`);
       }
     }
-    // Remove a linha de cabeçalho dos dados
-    rows = rows.slice(1);
   }
 
-  // Escolher o mapa que tem mais matches
-  const matchesFromCols = Object.keys(headerToId_fromCols).length;
-  const matchesFromRow0 = Object.keys(headerToId_fromFirstRow).length;
-  const headerToId = matchesFromRow0 > matchesFromCols ? headerToId_fromFirstRow : headerToId_fromCols;
-  console.log(`[cronograma] Usando mapa com ${Object.keys(headerToId).length} matches (cols: ${matchesFromCols}, row0: ${matchesFromRow0})`);
+  if (Object.keys(headerToId).length === 0) {
+    console.warn('[cronograma] Nenhum ID B0x encontrado nos cabeçalhos. Verifique a linha 1 da aba cronograma.');
+    return [];
+  }
+
+  // 2) Pular linha 2 (nomes descritivos)
+  const dataRows = rows.slice(1);
 
   const events = [];
   const diasMap = {
     'domingo':0, 'dom':0,
-    'segunda':1, 'segundafeira':1, 'seg':1,
-    'terca':2, 'tercafeira':2, 'ter':2,
-    'quarta':3, 'quartafeira':3, 'qua':3,
-    'quinta':4, 'quintafeira':4, 'qui':4,
-    'sexta':5, 'sextafeira':5, 'sex':5,
+    'segundafeira':1, 'segunda':1, 'seg':1,
+    'tercafeira':2, 'terca':2, 'ter':2,
+    'quartafeira':3, 'quarta':3, 'qua':3,
+    'quintafeira':4, 'quinta':4, 'qui':4,
+    'sextafeira':5, 'sexta':5, 'sex':5,
     'sabado':6, 'sab':6,
   };
+  // Ordenar chaves por comprimento decrescente (para casar "segundafeira" antes de "seg")
+  const diasKeys = Object.keys(diasMap).sort((a,b) => b.length - a.length);
 
-  rows.forEach((row, rowIdx) => {
+  let currentWeekday = -1; // herdado da última linha que tinha dia preenchido
+
+  dataRows.forEach((row, rowIdx) => {
     const c = row.c || [];
     const diaRaw = (c[0]?.v || '').toString().trim();
     const horaRaw = c[1]?.v;
-    if (!diaRaw || horaRaw == null) return;
 
-    const diaNorm = normalize(diaRaw);
-    let weekday = -1;
-    // Ordenar chaves por tamanho decrescente para casar "segundafeira" antes de "seg"
-    const keys = Object.keys(diasMap).sort((a,b) => b.length - a.length);
-    for (const k of keys) if (diaNorm.includes(k)) { weekday = diasMap[k]; break; }
-    if (weekday < 0) return;
+    // Se há dia na coluna A, atualiza o dia corrente
+    if (diaRaw) {
+      const diaNorm = normalize(diaRaw);
+      let found = -1;
+      for (const k of diasKeys) if (diaNorm.includes(k)) { found = diasMap[k]; break; }
+      if (found >= 0) currentWeekday = found;
+    }
+
+    if (currentWeekday < 0) return;        // ainda não temos dia
+    if (horaRaw == null || horaRaw === '') return; // linha sem horário
 
     // Normalizar horário
     let timeStr = '';
@@ -711,10 +697,9 @@ function parseCronograma(json) {
       const m = horaRaw.minutes ?? 0;
       timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
     }
-
     if (!timeStr) return;
 
-    // Varre colunas de banheiros
+    // Varre colunas dos banheiros
     for (let idx = 2; idx < c.length; idx++) {
       const cell = c[idx]?.v;
       if (cell == null || cell === '') continue;
@@ -725,11 +710,12 @@ function parseCronograma(json) {
       if (val.includes('full')) type = 'full';
       else if (val.includes('bas')) type = 'basica';
       if (!type) continue;
-      events.push({ weekday, time: timeStr, bathroomId: bathId, type });
+      events.push({ weekday: currentWeekday, time: timeStr, bathroomId: bathId, type });
     }
   });
 
-  console.log(`[cronograma] Parseados ${events.length} eventos:`, events);
+  console.log(`[cronograma] Parseados ${events.length} eventos`);
+  if (events.length > 0) console.log('[cronograma] Amostra:', events.slice(0,5));
   return events;
 }
 
