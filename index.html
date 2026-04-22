@@ -239,6 +239,42 @@
     .tl-who  { font-size:.78rem; font-weight:500; color: var(--navy-800); }
     .tl-empty { font-size:.78rem; color:var(--gray-400); font-style:italic; }
 
+    /* BATH LIST - Collapsible */
+    .bath-list .section-title {
+      margin-bottom: 0;
+      cursor: pointer;
+      user-select: none;
+      display: flex; align-items: center; gap: .5rem;
+      padding: .1rem 0;
+    }
+    .bath-list .section-title .collapse-chevron {
+      margin-left: auto;
+      transition: transform .25s ease;
+      color: var(--gold-500);
+      width: 18px; height: 18px;
+    }
+    .bath-list.collapsed .section-title .collapse-chevron {
+      transform: rotate(-90deg);
+    }
+    .bath-list-content {
+      overflow: hidden;
+      transition: max-height .3s ease, opacity .2s ease, margin-top .2s ease;
+      max-height: 1500px;
+      opacity: 1;
+      margin-top: 1rem;
+    }
+    .bath-list.collapsed .bath-list-content {
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+    }
+    .bath-list-summary {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      color: var(--gray-500);
+      margin-left: .5rem;
+    }
+
     .bath-row { display:flex; align-items:center; gap:.7rem; padding:.6rem .5rem; border-radius:4px; cursor:pointer; transition: all .15s; border-left: 3px solid transparent; }
     .bath-row:hover  { background: var(--navy-50); }
     .bath-row.active { background: var(--navy-100); border-left-color: var(--gold-500); padding-left:.4rem; }
@@ -367,9 +403,17 @@
       </div>
       <div id="detail-content" style="display:none"></div>
     </div>
-    <div class="bath-list">
-      <div class="section-title">Todas as Instalações</div>
-      <div id="bath-list-items"></div>
+    <div class="bath-list collapsed" id="bath-list">
+      <div class="section-title" onclick="toggleBathList()">
+        Todas as Instalações
+        <span class="bath-list-summary" id="bath-list-summary"></span>
+        <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+      <div class="bath-list-content">
+        <div id="bath-list-items"></div>
+      </div>
     </div>
   </div>
 </main>
@@ -560,6 +604,7 @@ function normalize(s) {
 function matchBathroomByHeader(header) {
   if (!header) return null;
   const hNorm = normalize(header);
+  if (!hNorm) return null;
 
   // 1) Tenta ID direto (B01, B02...)
   const idMatch = header.match(/\bB\d{2}\b/i);
@@ -568,39 +613,93 @@ function matchBathroomByHeader(header) {
     if (found) return found;
   }
 
-  // 2) Tenta match por nome normalizado
-  let best = null, bestScore = 0;
-  BATHROOMS_DEF.forEach(b => {
-    const bNorm = normalize(b.name);
-    // score: número de caracteres em comum (contém)
-    let score = 0;
-    if (hNorm === bNorm) score = 1000;
-    else if (hNorm.includes(bNorm) || bNorm.includes(hNorm)) score = Math.min(hNorm.length, bNorm.length);
+  // 2) Match por igualdade normalizada (ideal)
+  let exact = BATHROOMS_DEF.find(b => normalize(b.name) === hNorm);
+  if (exact) return exact;
 
-    // Match por palavras-chave (muito útil para variações)
-    const keywords = b.name.toLowerCase().split(/\s+/).map(normalize).filter(x => x.length > 2);
-    let kwHits = 0;
-    keywords.forEach(kw => { if (hNorm.includes(kw)) kwHits++; });
-    if (kwHits >= 2) score = Math.max(score, kwHits * 10);
+  // 3) Score baseado em palavras-chave
+  // Para cada banheiro, conta quantas palavras (>=3 chars) do nome aparecem no header.
+  // O melhor banheiro é o que tem MAIS palavras em comum E o MENOR número de palavras "sobrando".
+  let best = null, bestScore = -1;
+  BATHROOMS_DEF.forEach(b => {
+    const bWords = b.name.toLowerCase().split(/\s+/).filter(w => w.length >= 2).map(normalize);
+    const hWords = header.toLowerCase().split(/\s+/).filter(w => w.length >= 2).map(normalize);
+
+    let hits = 0;
+    bWords.forEach(bw => { if (hWords.includes(bw)) hits++; });
+
+    // Precisa de pelo menos metade das palavras do nome
+    if (hits < Math.ceil(bWords.length / 2)) return;
+
+    // Score: prioriza cobertura total e penaliza palavras extras
+    const coverage = hits / bWords.length;
+    const extra = hWords.length - hits;
+    const score = coverage * 100 - extra * 2;
 
     if (score > bestScore) { bestScore = score; best = b; }
   });
 
-  return bestScore > 0 ? best : null;
+  return best;
 }
 
 function parseCronograma(json) {
   const cols = json?.table?.cols || [];
-  const rows = json?.table?.rows || [];
-  if (!rows.length) return [];
-
-  // Mapear cada coluna (a partir da C) para um banheiro
-  const headerToId = {};
-  for (let i = 2; i < cols.length; i++) {
-    const headerLabel = cols[i]?.label || '';
-    const match = matchBathroomByHeader(headerLabel);
-    if (match) headerToId[i] = match.id;
+  let rows = json?.table?.rows || [];
+  if (!rows.length) {
+    console.warn('[cronograma] Nenhuma linha encontrada');
+    return [];
   }
+
+  // ═══ MONTAR MAPA DE CABEÇALHOS ═══
+  // O gviz pode colocar os headers em cols[i].label OU na primeira linha (rows[0])
+  // Vamos tentar ambos e usar o que tiver mais matches
+
+  const headerToId_fromCols = {};
+  for (let i = 2; i < cols.length; i++) {
+    const label = cols[i]?.label || '';
+    const match = matchBathroomByHeader(label);
+    if (match) {
+      headerToId_fromCols[i] = match.id;
+      console.log(`[cronograma cols] col ${i} "${label}" → ${match.id} (${match.name})`);
+    } else if (label) {
+      console.warn(`[cronograma cols] col ${i} "${label}" → SEM MATCH`);
+    }
+  }
+
+  // Se a primeira linha parecer ser cabeçalho (contém textos tipo "CANTINA", "HALL", etc),
+  // vamos ler de lá também
+  const headerToId_fromFirstRow = {};
+  const firstRow = rows[0]?.c || [];
+  let firstRowLooksLikeHeader = false;
+  const firstRowHints = ['cantina', 'cinema', 'hall', 'corredor', 'banheiro'];
+  for (let i = 2; i < firstRow.length; i++) {
+    const val = (firstRow[i]?.v || '').toString().toLowerCase();
+    if (firstRowHints.some(h => val.includes(h))) {
+      firstRowLooksLikeHeader = true;
+      break;
+    }
+  }
+
+  if (firstRowLooksLikeHeader) {
+    for (let i = 2; i < firstRow.length; i++) {
+      const label = (firstRow[i]?.v || '').toString();
+      const match = matchBathroomByHeader(label);
+      if (match) {
+        headerToId_fromFirstRow[i] = match.id;
+        console.log(`[cronograma row0] col ${i} "${label}" → ${match.id} (${match.name})`);
+      } else if (label) {
+        console.warn(`[cronograma row0] col ${i} "${label}" → SEM MATCH`);
+      }
+    }
+    // Remove a linha de cabeçalho dos dados
+    rows = rows.slice(1);
+  }
+
+  // Escolher o mapa que tem mais matches
+  const matchesFromCols = Object.keys(headerToId_fromCols).length;
+  const matchesFromRow0 = Object.keys(headerToId_fromFirstRow).length;
+  const headerToId = matchesFromRow0 > matchesFromCols ? headerToId_fromFirstRow : headerToId_fromCols;
+  console.log(`[cronograma] Usando mapa com ${Object.keys(headerToId).length} matches (cols: ${matchesFromCols}, row0: ${matchesFromRow0})`);
 
   const events = [];
   const diasMap = {
@@ -613,7 +712,7 @@ function parseCronograma(json) {
     'sabado':6, 'sab':6,
   };
 
-  rows.forEach(row => {
+  rows.forEach((row, rowIdx) => {
     const c = row.c || [];
     const diaRaw = (c[0]?.v || '').toString().trim();
     const horaRaw = c[1]?.v;
@@ -621,7 +720,9 @@ function parseCronograma(json) {
 
     const diaNorm = normalize(diaRaw);
     let weekday = -1;
-    for (const k in diasMap) if (diaNorm.includes(k)) { weekday = diasMap[k]; break; }
+    // Ordenar chaves por tamanho decrescente para casar "segundafeira" antes de "seg"
+    const keys = Object.keys(diasMap).sort((a,b) => b.length - a.length);
+    for (const k of keys) if (diaNorm.includes(k)) { weekday = diasMap[k]; break; }
     if (weekday < 0) return;
 
     // Normalizar horário
@@ -637,6 +738,10 @@ function parseCronograma(json) {
     } else if (typeof horaRaw === 'number') {
       const totalMin = Math.round(horaRaw * 24 * 60);
       const h = Math.floor(totalMin/60), m = totalMin % 60;
+      timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    } else if (typeof horaRaw === 'object' && horaRaw !== null) {
+      const h = horaRaw.hours ?? 0;
+      const m = horaRaw.minutes ?? 0;
       timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
     }
 
@@ -657,6 +762,7 @@ function parseCronograma(json) {
     }
   });
 
+  console.log(`[cronograma] Parseados ${events.length} eventos:`, events);
   return events;
 }
 
@@ -877,6 +983,11 @@ function buildAllBlocks() {
 }
 
 function buildList() {
+  // Atualizar resumo compacto
+  const total = bathrooms.length;
+  const ok = bathrooms.filter(b => b.status === 'clean').length;
+  document.getElementById('bath-list-summary').textContent = `${ok}/${total}`;
+
   document.getElementById('bath-list-items').innerHTML =
     bathrooms.map((b,i) => `
       ${i ? '<div class="bath-sep"></div>' : ''}
@@ -887,6 +998,10 @@ function buildList() {
         <span class="bath-row-time">${b.lastClean ? fmt(b.lastClean) : '—'}</span>
       </div>
     `).join('');
+}
+
+function toggleBathList() {
+  document.getElementById('bath-list').classList.toggle('collapsed');
 }
 
 function selectBath(id) {
