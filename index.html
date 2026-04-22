@@ -128,9 +128,56 @@
     .legend-dot { width:9px; height:9px; border-radius:50%; box-shadow: 0 0 6px currentColor; }
 
     .sidebar { display:flex; flex-direction:column; gap:1rem; }
-    .detail-panel, .bath-list { background:white; border:1px solid var(--navy-100); border-radius:8px; padding:1.25rem; border-top:3px solid var(--navy-600); }
+    .detail-panel, .bath-list, .team-panel { background:white; border:1px solid var(--navy-100); border-radius:8px; padding:1.25rem; border-top:3px solid var(--navy-600); }
     .bath-list { border-top-color: var(--gold-500); }
+    .team-panel { border-top-color: var(--green-500); }
     .detail-empty { text-align:center; padding:2rem 1rem; color:var(--gray-400); font-size:.83rem; }
+
+    /* TEAM PANEL */
+    .team-members { display: flex; flex-direction: column; gap: .5rem; }
+    .team-member {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .5rem .65rem;
+      background: var(--navy-50);
+      border: 1px solid var(--navy-100);
+      border-left: 3px solid var(--green-500);
+      border-radius: 4px;
+      transition: all .2s;
+    }
+    .team-member.absent {
+      border-left-color: var(--gray-300);
+      background: var(--gray-100);
+      opacity: 0.55;
+    }
+    .team-member-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--navy-600), var(--navy-800));
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: .75rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .team-member.absent .team-member-avatar {
+      background: linear-gradient(135deg, var(--gray-400), var(--gray-500));
+    }
+    .team-member-info { flex: 1; min-width: 0; }
+    .team-member-name {
+      font-size: .78rem; font-weight: 600;
+      color: var(--navy-900);
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      line-height: 1.1;
+    }
+    .team-member.absent .team-member-name { color: var(--gray-500); text-decoration: line-through; }
+    .team-member-status {
+      font-size: .62rem; color: var(--gray-500);
+      margin-top: 2px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .team-member.present .team-member-status { color: var(--green-500); font-weight: 600; }
 
     .detail-header { display:flex; align-items:center; gap:.75rem; margin-bottom:1rem; }
     .detail-icon-wrap { width:48px; height:48px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; border:2px solid; }
@@ -152,7 +199,6 @@
     .info-item-value { font-family: var(--font-display); font-size:.9rem; font-weight:600; color: var(--navy-900); }
     .info-item-sub { font-size:.62rem; color:var(--gray-500); margin-top:1px; }
 
-    /* CLEANING TYPE CARD */
     .cleaning-type {
       margin-top: 1rem;
       background: var(--navy-50);
@@ -161,10 +207,7 @@
       border-radius: 6px;
       padding: .85rem;
     }
-    .cleaning-type-header {
-      display: flex; align-items: center; gap: .5rem;
-      margin-bottom: .5rem;
-    }
+    .cleaning-type-header { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
     .cleaning-type-badge {
       font-family: var(--font-display);
       font-size: .65rem; font-weight: 700;
@@ -172,24 +215,13 @@
       padding: .2rem .55rem; border-radius: 3px;
       color: white; background: var(--purple-500);
     }
-    .cleaning-type-badge.full {
-      background: linear-gradient(135deg, var(--purple-500), #6d28d9);
-    }
-    .cleaning-type-title {
-      font-size: .75rem; font-weight: 600;
-      color: var(--navy-900);
-    }
-    .cleaning-type-tasks {
-      font-size: .72rem; color: var(--gray-700);
-      line-height: 1.55;
-    }
+    .cleaning-type-badge.full { background: linear-gradient(135deg, var(--purple-500), #6d28d9); }
+    .cleaning-type-title { font-size: .75rem; font-weight: 600; color: var(--navy-900); }
+    .cleaning-type-tasks { font-size: .72rem; color: var(--gray-700); line-height: 1.55; }
     .cleaning-type-tasks span {
-      display: inline-block;
-      background: white;
-      padding: 2px 7px;
-      margin: 2px 3px 2px 0;
-      border-radius: 3px;
-      border: 1px solid var(--navy-100);
+      display: inline-block; background: white;
+      padding: 2px 7px; margin: 2px 3px 2px 0;
+      border-radius: 3px; border: 1px solid var(--navy-100);
       font-size: .68rem;
     }
 
@@ -245,7 +277,7 @@
     </div>
   </div>
   <div class="header-right">
-    <a class="form-btn" href="https://docs.google.com/forms/d/e/1FAIpQLScEgtfwChHMu0LtZoJFjIzJM-PcbDly_kWRS3M2_Wjm37Iktw/viewform" target="_blank">
+    <a class="form-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSfPBxIMMMreVWbx0gffg9r4l2Q-_WRxn3n_on3SkHaRH9C1AA/viewform" target="_blank">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
       Registrar Limpeza
     </a>
@@ -310,7 +342,7 @@
   </div>
 
   <div class="sidebar">
-    <a class="register-cta" href="https://docs.google.com/forms/d/e/1FAIpQLScEgtfwChHMu0LtZoJFjIzJM-PcbDly_kWRS3M2_Wjm37Iktw/viewform" target="_blank">
+    <a class="register-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSfPBxIMMMreVWbx0gffg9r4l2Q-_WRxn3n_on3SkHaRH9C1AA/viewform" target="_blank">
       <div class="register-cta-icon"><img src="assets/cocar-fab.png" alt="" /></div>
       <div class="register-cta-text">
         <div class="register-cta-title">Registrar Limpeza</div>
@@ -318,6 +350,14 @@
       </div>
       <svg class="register-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H9M17 7V15"/></svg>
     </a>
+
+    <!-- EQUIPE DE LIMPEZA -->
+    <div class="team-panel">
+      <div class="section-title">Equipe de Limpeza — Hoje</div>
+      <div class="team-members" id="team-members">
+        <!-- injetado pelo JS -->
+      </div>
+    </div>
 
     <div class="detail-panel" id="detail-panel">
       <div class="section-title">Detalhes da Instalação</div>
@@ -343,16 +383,34 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-/* ── CONFIG ── */
+/* ══════════════════════════════════════════════════════════════
+   CONFIG
+   ══════════════════════════════════════════════════════════════ */
 const SHEET_ID  = '1wFKX6eVRi1VOtcQH4Bb0xJ32saXAUw2FihIiHdw_-yc';
 const SHEET_URL = name => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
 const REFRESH_MS = 60000;
 
-/* ── DIAS DA SEMANA ── */
-const WEEKDAYS = ['DOMINGO', 'SEGUNDA', 'TERÇA', 'QUARTA', 'QUINTA', 'SEXTA', 'SÁBADO'];
-const WEEKDAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+// Agenda pública da equipe de limpeza
+const CALENDAR_ID = 'afa.siede@gmail.com';
+// Feed JSON público (API v3 sem autenticação funciona se a agenda for pública)
+const CALENDAR_URL = (timeMin, timeMax) =>
+  `https://clients6.google.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events` +
+  `?key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
 
-/* ── TIPOS DE LIMPEZA ── */
+/* ══════════════════════════════════════════════════════════════
+   EQUIPE DE LIMPEZA
+   ══════════════════════════════════════════════════════════════ */
+const TEAM = [
+  { name: 'IVAN',        initials: 'IV' },
+  { name: 'V SANTOS',    initials: 'VS' },
+  { name: 'XAVIER',      initials: 'XA' },
+  { name: 'KAUÃ XAVES',  initials: 'KX' },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   CRONOGRAMA - TIPOS
+   ══════════════════════════════════════════════════════════════ */
+const WEEKDAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 const CLEANING_TYPES = {
   'basica': {
     label: 'Básica',
@@ -364,7 +422,9 @@ const CLEANING_TYPES = {
   }
 };
 
-/* ── BANHEIROS POR BLOCO ── */
+/* ══════════════════════════════════════════════════════════════
+   BANHEIROS
+   ══════════════════════════════════════════════════════════════ */
 const BLOCKS = {
   cantina: {
     footprint: { w: 4, h: 6 },
@@ -383,16 +443,14 @@ const BLOCKS = {
   admin: {
     footprint: { w: 16, h: 7 },
     bathrooms: [
-      // Hall Central (esquerda) — 4 banheiros
-      { id:'B05', name:'Hall Central DE Fem',       shortName:'DE Fem',    icon:'🚺', location:'Prédio Adm — Hall Central', gx:2, gy:1 },
-      { id:'B06', name:'Hall Central DE Of Sup Masc', shortName:'Of Sup',  icon:'⭐', location:'Prédio Adm — Hall Central', gx:2, gy:3 },
-      { id:'B07', name:'Hall Central Prof Fem',     shortName:'Prof F',    icon:'🚺', location:'Prédio Adm — Hall Central', gx:4, gy:1 },
-      { id:'B08', name:'Hall Central Prof Masc',    shortName:'Prof M',    icon:'🚹', location:'Prédio Adm — Hall Central', gx:4, gy:3 },
-      // Corredor (direita) — 4 banheiros
-      { id:'B09',  name:'Corredor DE Of Masc',   shortName:'Of M',   icon:'⭐', location:'Prédio Adm — Corredor', gx:11, gy:1 },
-      { id:'B10', name:'Corredor DE Grad Masc', shortName:'Grad M', icon:'🚹', location:'Prédio Adm — Corredor', gx:11, gy:3 },
-      { id:'B11', name:'Corredor DE Of Fem',    shortName:'Of F',   icon:'🚺', location:'Prédio Adm — Corredor', gx:13, gy:1 },
-      { id:'B12', name:'Corredor DE Grad Fem',  shortName:'Grad F', icon:'🚺', location:'Prédio Adm — Corredor', gx:13, gy:3 },
+      { id:'B05', name:'Hall Central DE Fem',         shortName:'DE Fem',    icon:'🚺', location:'Prédio Adm — Hall Central', gx:2, gy:1 },
+      { id:'B06', name:'Hall Central DE Of Sup Masc', shortName:'Of Sup',    icon:'⭐', location:'Prédio Adm — Hall Central', gx:2, gy:3 },
+      { id:'B07', name:'Hall Central Prof Fem',       shortName:'Prof F',    icon:'🚺', location:'Prédio Adm — Hall Central', gx:4, gy:1 },
+      { id:'B08', name:'Hall Central Prof Masc',      shortName:'Prof M',    icon:'🚹', location:'Prédio Adm — Hall Central', gx:4, gy:3 },
+      { id:'B09', name:'Corredor DE Of Masc',         shortName:'Of M',      icon:'⭐', location:'Prédio Adm — Corredor',     gx:11, gy:1 },
+      { id:'B10', name:'Corredor DE Grad Masc',       shortName:'Grad M',    icon:'🚹', location:'Prédio Adm — Corredor',     gx:11, gy:3 },
+      { id:'B11', name:'Corredor DE Of Fem',          shortName:'Of F',      icon:'🚺', location:'Prédio Adm — Corredor',     gx:13, gy:1 },
+      { id:'B12', name:'Corredor DE Grad Fem',        shortName:'Grad F',    icon:'🚺', location:'Prédio Adm — Corredor',     gx:13, gy:3 },
     ]
   },
 };
@@ -404,7 +462,8 @@ const BATHROOMS_DEF = [
 ];
 
 let bathrooms = BATHROOMS_DEF.map(b => ({ ...b, status:'no-data', lastClean:null, cleaner:'—', history:[], nextClean:null, nextType:null }));
-let cronograma = []; // [{ weekday:0-6, time:'HH:MM', bathroomId, type:'basica'|'full' }]
+let cronograma = [];
+let teamAbsences = new Set(); // nomes ausentes hoje
 let selected = null;
 
 function computeStatus(lastClean) {
@@ -415,7 +474,9 @@ function computeStatus(lastClean) {
   return 'dirty';
 }
 
-/* ── BUILD A BLOCK SVG ── */
+/* ══════════════════════════════════════════════════════════════
+   SVG DO BLOCO
+   ══════════════════════════════════════════════════════════════ */
 function buildBlockSVG(blockKey, bathroomsData) {
   const block = BLOCKS[blockKey];
   const W = block.footprint.w, H = block.footprint.h;
@@ -427,7 +488,6 @@ function buildBlockSVG(blockKey, bathroomsData) {
   const oy = 10 + CUBE_Z;
 
   function iso(gx, gy) { return { x: ox + (gx - gy) * 0.866 * CELL, y: oy + (gx + gy) * 0.5 * CELL }; }
-
   const g0 = iso(0,0), g1 = iso(W,0), g2 = iso(W,H), g3 = iso(0,H);
 
   function cubeSVG(gx, gy, status, icon, name, id) {
@@ -469,7 +529,9 @@ function buildBlockSVG(blockKey, bathroomsData) {
   `;
 }
 
-/* ── FETCH GENERICO DO GSHEET ── */
+/* ══════════════════════════════════════════════════════════════
+   FETCH SHEET TAB
+   ══════════════════════════════════════════════════════════════ */
 async function fetchSheetTab(sheetNames) {
   for (const sheetName of sheetNames) {
     try {
@@ -485,34 +547,71 @@ async function fetchSheetTab(sheetNames) {
   return null;
 }
 
-/* ── PARSE CRONOGRAMA ──
-   Estrutura:
-   A: dia da semana (ex: "Segunda-feira", "Segunda", "SEGUNDA")
-   B: horário (ex: "08:00")
-   C..N: nome do banheiro no cabeçalho (linha 1), células: "básica", "full" ou vazio
-*/
+/* ══════════════════════════════════════════════════════════════
+   PARSE CRONOGRAMA (MATCH ROBUSTO POR NOME)
+   ══════════════════════════════════════════════════════════════ */
+function normalize(s) {
+  return (s || '').toString()
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+    .replace(/[^a-z0-9]/g, ''); // só letras e números
+}
+
+function matchBathroomByHeader(header) {
+  if (!header) return null;
+  const hNorm = normalize(header);
+
+  // 1) Tenta ID direto (B01, B02...)
+  const idMatch = header.match(/\bB\d{2}\b/i);
+  if (idMatch) {
+    const found = BATHROOMS_DEF.find(b => b.id.toUpperCase() === idMatch[0].toUpperCase());
+    if (found) return found;
+  }
+
+  // 2) Tenta match por nome normalizado
+  let best = null, bestScore = 0;
+  BATHROOMS_DEF.forEach(b => {
+    const bNorm = normalize(b.name);
+    // score: número de caracteres em comum (contém)
+    let score = 0;
+    if (hNorm === bNorm) score = 1000;
+    else if (hNorm.includes(bNorm) || bNorm.includes(hNorm)) score = Math.min(hNorm.length, bNorm.length);
+
+    // Match por palavras-chave (muito útil para variações)
+    const keywords = b.name.toLowerCase().split(/\s+/).map(normalize).filter(x => x.length > 2);
+    let kwHits = 0;
+    keywords.forEach(kw => { if (hNorm.includes(kw)) kwHits++; });
+    if (kwHits >= 2) score = Math.max(score, kwHits * 10);
+
+    if (score > bestScore) { bestScore = score; best = b; }
+  });
+
+  return bestScore > 0 ? best : null;
+}
+
 function parseCronograma(json) {
   const cols = json?.table?.cols || [];
   const rows = json?.table?.rows || [];
   if (!rows.length) return [];
 
-  // Os cabeçalhos dos banheiros vêm em cols[2..N].label OU na primeira linha
-  // O gviz interpreta a 1ª linha como labels quando headers=1 (padrão)
-  const bathHeaders = cols.slice(2).map(c => (c.label || '').toString().trim());
-
-  // Mapear cabeçalho → id
+  // Mapear cada coluna (a partir da C) para um banheiro
   const headerToId = {};
-  bathHeaders.forEach((h, idx) => {
-    if (!h) return;
-    const match = BATHROOMS_DEF.find(b => {
-      const bn = b.name.toLowerCase().replace(/\s+/g,' ').trim();
-      const hh = h.toLowerCase().replace(/\s+/g,' ').trim();
-      return bn === hh || hh.includes(bn) || bn.includes(hh);
-    });
-    if (match) headerToId[idx] = match.id;
-  });
+  for (let i = 2; i < cols.length; i++) {
+    const headerLabel = cols[i]?.label || '';
+    const match = matchBathroomByHeader(headerLabel);
+    if (match) headerToId[i] = match.id;
+  }
 
   const events = [];
+  const diasMap = {
+    'domingo':0, 'dom':0,
+    'segunda':1, 'segundafeira':1, 'seg':1,
+    'terca':2, 'tercafeira':2, 'ter':2,
+    'quarta':3, 'quartafeira':3, 'qua':3,
+    'quinta':4, 'quintafeira':4, 'qui':4,
+    'sexta':5, 'sextafeira':5, 'sex':5,
+    'sabado':6, 'sab':6,
+  };
 
   rows.forEach(row => {
     const c = row.c || [];
@@ -520,59 +619,40 @@ function parseCronograma(json) {
     const horaRaw = c[1]?.v;
     if (!diaRaw || horaRaw == null) return;
 
-    // Normalizar dia da semana
-    const diaNorm = diaRaw.toLowerCase().replace(/[^a-záéíóúâêôç]/g,'');
+    const diaNorm = normalize(diaRaw);
     let weekday = -1;
-    const diasMap = {
-      'domingo':0, 'dom':0,
-      'segunda':1, 'segundafeira':1, 'seg':1,
-      'terca':2, 'tercafeira':2, 'ter':2,
-      'quarta':3, 'quartafeira':3, 'qua':3,
-      'quinta':4, 'quintafeira':4, 'qui':4,
-      'sexta':5, 'sextafeira':5, 'sex':5,
-      'sabado':6, 'sab':6,
-    };
-    for (const k in diasMap) {
-      if (diaNorm.includes(k)) { weekday = diasMap[k]; break; }
-    }
+    for (const k in diasMap) if (diaNorm.includes(k)) { weekday = diasMap[k]; break; }
     if (weekday < 0) return;
 
     // Normalizar horário
     let timeStr = '';
     if (typeof horaRaw === 'string') {
-      const mt = horaRaw.match(/(\d{1,2})[h:](\d{0,2})/);
-      if (mt) timeStr = `${mt[1].padStart(2,'0')}:${(mt[2]||'00').padStart(2,'0')}`;
-      else timeStr = horaRaw;
-    } else if (typeof horaRaw === 'object' && horaRaw !== null) {
-      // gviz às vezes devolve como objeto Date
-      const h = horaRaw.v?.hours ?? new Date(horaRaw.v).getHours?.();
-      const m = horaRaw.v?.minutes ?? new Date(horaRaw.v).getMinutes?.();
-      if (h != null && m != null) timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      if (horaRaw.startsWith('Date(')) {
+        const mm = horaRaw.match(/Date\(\d+,\d+,\d+,(\d+),(\d+),\d+\)/);
+        if (mm) timeStr = `${mm[1].padStart(2,'0')}:${mm[2].padStart(2,'0')}`;
+      } else {
+        const mt = horaRaw.match(/(\d{1,2})[h:.](\d{0,2})/);
+        if (mt) timeStr = `${mt[1].padStart(2,'0')}:${(mt[2]||'00').padStart(2,'0')}`;
+      }
     } else if (typeof horaRaw === 'number') {
-      // serial de tempo do sheets (fração do dia)
       const totalMin = Math.round(horaRaw * 24 * 60);
       const h = Math.floor(totalMin/60), m = totalMin % 60;
       timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
     }
 
-    // Tratar caso onde horaRaw venha como "Date(1899,11,30,8,0,0)"
-    if (typeof horaRaw === 'string' && horaRaw.startsWith('Date(')) {
-      const mm = horaRaw.match(/Date\(\d+,\d+,\d+,(\d+),(\d+),\d+\)/);
-      if (mm) timeStr = `${mm[1].padStart(2,'0')}:${mm[2].padStart(2,'0')}`;
-    }
+    if (!timeStr) return;
 
-    // Cada coluna de banheiro
+    // Varre colunas de banheiros
     for (let idx = 2; idx < c.length; idx++) {
       const cell = c[idx]?.v;
       if (cell == null || cell === '') continue;
-      const bathId = headerToId[idx - 2];
+      const bathId = headerToId[idx];
       if (!bathId) continue;
       const val = cell.toString().toLowerCase().trim();
       let type = null;
       if (val.includes('full')) type = 'full';
-      else if (val.includes('bás') || val.includes('bas')) type = 'basica';
+      else if (val.includes('bas')) type = 'basica';
       if (!type) continue;
-
       events.push({ weekday, time: timeStr, bathroomId: bathId, type });
     }
   });
@@ -580,7 +660,9 @@ function parseCronograma(json) {
   return events;
 }
 
-/* ── PRÓXIMO EVENTO POR BANHEIRO ── */
+/* ══════════════════════════════════════════════════════════════
+   PRÓXIMA LIMPEZA POR BANHEIRO
+   ══════════════════════════════════════════════════════════════ */
 function computeNextCleaning(bathroomId) {
   const relevant = cronograma.filter(e => e.bathroomId === bathroomId);
   if (!relevant.length) return null;
@@ -589,26 +671,19 @@ function computeNextCleaning(bathroomId) {
   const todayDay = now.getDay();
   const currentMin = now.getHours() * 60 + now.getMinutes();
 
-  let best = null;
-  let bestDelta = Infinity;
-
+  let best = null, bestDelta = Infinity;
   relevant.forEach(e => {
     const [h, m] = e.time.split(':').map(Number);
     if (isNaN(h) || isNaN(m)) return;
     const eventMin = h * 60 + m;
-    // Dias até este evento (ajustado para hoje se horário ainda não passou)
     let daysAhead = (e.weekday - todayDay + 7) % 7;
     if (daysAhead === 0 && eventMin <= currentMin) daysAhead = 7;
     const delta = daysAhead * 24 * 60 + (eventMin - currentMin);
-    if (delta < bestDelta) {
-      bestDelta = delta;
-      best = e;
-    }
+    if (delta < bestDelta) { bestDelta = delta; best = e; }
   });
 
   if (!best) return null;
 
-  // Calcular data/hora exata
   const [h, m] = best.time.split(':').map(Number);
   const nextDate = new Date(now);
   let daysAhead = (best.weekday - todayDay + 7) % 7;
@@ -620,7 +695,9 @@ function computeNextCleaning(bathroomId) {
   return { date: nextDate, weekday: best.weekday, time: best.time, type: best.type };
 }
 
-/* ── PARSE RESPOSTAS ── */
+/* ══════════════════════════════════════════════════════════════
+   PARSE RESPOSTAS DO FORMS
+   ══════════════════════════════════════════════════════════════ */
 function parseRespostas(json) {
   const rows = json?.table?.rows || [];
   const histMap = {};
@@ -652,19 +729,63 @@ function parseRespostas(json) {
   return histMap;
 }
 
-/* ── FETCH TUDO ── */
+/* ══════════════════════════════════════════════════════════════
+   FETCH AGENDA PÚBLICA (AUSÊNCIAS)
+   ══════════════════════════════════════════════════════════════ */
+async function fetchAbsences() {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+  const timeMin = encodeURIComponent(todayStart.toISOString());
+  const timeMax = encodeURIComponent(todayEnd.toISOString());
+
+  try {
+    const res = await fetch(CALENDAR_URL(timeMin, timeMax));
+    if (!res.ok) {
+      console.warn('Calendar fetch falhou:', res.status);
+      return new Set();
+    }
+    const data = await res.json();
+    const items = data.items || [];
+    const absent = new Set();
+
+    items.forEach(item => {
+      const summary = (item.summary || '').toUpperCase();
+      // Verificar se o nome de algum soldado aparece no evento
+      TEAM.forEach(member => {
+        if (summary.includes(member.name.toUpperCase())) {
+          absent.add(member.name);
+        }
+      });
+    });
+
+    return absent;
+  } catch(e) {
+    console.warn('Erro ao buscar agenda:', e);
+    return new Set();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FETCH TUDO
+   ══════════════════════════════════════════════════════════════ */
 async function fetchAll() {
-  setBanner('loading', 'Sincronizando com a planilha…');
+  setBanner('loading', 'Sincronizando dados…');
   setRefreshSpinning(true);
 
-  const [respJson, cronoJson] = await Promise.all([
+  const [respJson, cronoJson, absences] = await Promise.all([
     fetchSheetTab(['Respostas', 'Respostas do formulário 1', 'Form Responses 1']),
     fetchSheetTab(['cronograma', 'Cronograma', 'CRONOGRAMA']),
+    fetchAbsences(),
   ]);
+
+  teamAbsences = absences;
 
   if (!respJson && !cronoJson) {
     setBanner('error', '⚠️ Não foi possível ler a planilha. Verifique o compartilhamento.');
     setRefreshSpinning(false);
+    renderTeam();
     return;
   }
 
@@ -699,12 +820,30 @@ async function fetchAll() {
   }
 }
 
-/* ── RENDER ── */
+/* ══════════════════════════════════════════════════════════════
+   RENDER
+   ══════════════════════════════════════════════════════════════ */
 function renderAll() {
   buildSummary();
   buildAllBlocks();
   buildList();
+  renderTeam();
   if (selected) renderDetail(bathrooms.find(b => b.id === selected));
+}
+
+function renderTeam() {
+  document.getElementById('team-members').innerHTML = TEAM.map(m => {
+    const absent = teamAbsences.has(m.name);
+    return `
+      <div class="team-member ${absent ? 'absent' : 'present'}">
+        <div class="team-member-avatar">${m.initials}</div>
+        <div class="team-member-info">
+          <div class="team-member-name">${m.name}</div>
+          <div class="team-member-status">${absent ? 'Ausente' : '✓ Presente'}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function buildSummary() {
@@ -777,20 +916,14 @@ function renderDetail(b) {
         </div>`).join('')
     : '<div class="tl-empty">Nenhum registro encontrado para esta instalação.</div>';
 
-  // Próxima limpeza
-  let nextBlock = `
-    <div class="info-item-value">—</div>
-    <div class="info-item-sub">Sem cronograma</div>
-  `;
+  let nextBlock = `<div class="info-item-value">—</div><div class="info-item-sub">Sem cronograma</div>`;
   if (b.nextClean) {
-    const weekdayLabel = WEEKDAYS_SHORT[b.nextWeekday];
     nextBlock = `
-      <div class="info-item-value">${weekdayLabel} · ${b.nextTime}</div>
+      <div class="info-item-value">${WEEKDAYS_SHORT[b.nextWeekday]} · ${b.nextTime}</div>
       <div class="info-item-sub">${fmtNext(b.nextClean)}</div>
     `;
   }
 
-  // Tipo de limpeza
   let cleaningCard = '';
   if (b.nextType && CLEANING_TYPES[b.nextType]) {
     const ct = CLEANING_TYPES[b.nextType];
@@ -839,7 +972,9 @@ function renderDetail(b) {
   `;
 }
 
-/* ── HELPERS ── */
+/* ══════════════════════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════════════════════ */
 const statusLabel = s => ({ clean:'Operacional', warning:'Atenção', dirty:'Requer Limpeza', 'no-data':'Sem Registro' }[s] || '—');
 const statusColor = s => ({ clean:'#10b981', warning:'#f59e0b', dirty:'#ef4444', 'no-data':'#94a3b8' }[s] || '#94a3b8');
 const fmt     = d => d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -872,6 +1007,7 @@ function hideTip(){ tip.classList.remove('show'); }
 document.addEventListener('mousemove', e => { tip.style.left = (e.clientX+14)+'px'; tip.style.top = (e.clientY-32)+'px'; });
 
 /* INIT */
+renderTeam(); // render inicial sem dados
 fetchAll();
 setInterval(fetchAll, REFRESH_MS);
 setInterval(updateClock, 1000);
