@@ -609,43 +609,64 @@ function matchBathroomByHeader(header) {
   return BATHROOMS_DEF.find(b => b.id.toUpperCase() === m[0].toUpperCase()) || null;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   PARSE CRONOGRAMA - ABORDAGEM SIMPLES E DIRETA
+   - Lê a aba inteira SEM tratar nada como cabeçalho (headers=0)
+   - Linha 1 = IDs (B01..B12) em C-N
+   - Linha 2 = nomes descritivos (ignorada)
+   - Linha 3+ = dados: A=dia, B=horário, C-N=tipo
+   ══════════════════════════════════════════════════════════════ */
+async function fetchCronogramaRaw() {
+  const urls = [
+    // URL com headers=0 para retornar dados brutos (sem detecção de cabeçalho)
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=cronograma&headers=0`,
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Cronograma&headers=0`,
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CRONOGRAMA&headers=0`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      const text = await res.text();
+      const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+      if (!match) continue;
+      const candidate = JSON.parse(match[1]);
+      if (candidate?.status === 'error') continue;
+      return candidate;
+    } catch(e) {}
+  }
+  return null;
+}
+
 function parseCronograma(json) {
-  const cols = json?.table?.cols || [];
   const rows = json?.table?.rows || [];
-  if (!rows.length) {
-    console.warn('[cronograma] Nenhuma linha encontrada');
+  if (rows.length < 3) {
+    console.warn('[cronograma] Precisa ter pelo menos 3 linhas (IDs, nomes, dados)');
     return [];
   }
 
-  // ═══ ESTRUTURA REAL DA ABA cronograma ═══
-  // Linha 1 (cols[i].label): IDs "B01", "B02"... na coluna C em diante
-  // Linha 2 (rows[0]):       Nomes descritivos (CANTINA FEM, etc.) - ignorar
-  // Linha 3+ (rows[1+]):     dados. Coluna A = dia, B = horário, C..N = tipo
-  //                          IMPORTANTE: coluna A só é preenchida na PRIMEIRA linha
-  //                          de cada dia; nas demais fica vazia (herda o dia anterior)
-
-  // 1) Mapear colunas por ID nos cabeçalhos (cols[i].label)
+  // ═══ LINHA 1 DA PLANILHA = rows[0] = IDs dos banheiros ═══
+  const headerRow = rows[0]?.c || [];
   const headerToId = {};
-  for (let i = 2; i < cols.length; i++) {
-    const label = (cols[i]?.label || '').toString();
-    const m = label.match(/B\d{2}/i);
+  for (let i = 2; i < headerRow.length; i++) {
+    const val = (headerRow[i]?.v || '').toString();
+    const m = val.match(/B\d{2}/i);
     if (m) {
       const id = m[0].toUpperCase();
       const found = BATHROOMS_DEF.find(b => b.id.toUpperCase() === id);
       if (found) {
         headerToId[i] = found.id;
-        console.log(`[cronograma] col ${i} (label="${label}") → ${found.id}`);
       }
     }
   }
 
   if (Object.keys(headerToId).length === 0) {
-    console.warn('[cronograma] Nenhum ID B0x encontrado nos cabeçalhos. Verifique a linha 1 da aba cronograma.');
+    console.warn('[cronograma] Nenhum ID B0x encontrado na linha 1. Conteúdo:', headerRow.map(c => c?.v));
     return [];
   }
+  console.log('[cronograma] Mapeamento de colunas:', headerToId);
 
-  // 2) Pular linha 2 (nomes descritivos)
-  const dataRows = rows.slice(1);
+  // ═══ PULAR LINHA 2 (nomes descritivos) → dados começam em rows[2] ═══
+  const dataRows = rows.slice(2);
 
   const events = [];
   const diasMap = {
@@ -657,26 +678,23 @@ function parseCronograma(json) {
     'sextafeira':5, 'sexta':5, 'sex':5,
     'sabado':6, 'sab':6,
   };
-  // Ordenar chaves por comprimento decrescente (para casar "segundafeira" antes de "seg")
   const diasKeys = Object.keys(diasMap).sort((a,b) => b.length - a.length);
 
-  let currentWeekday = -1; // herdado da última linha que tinha dia preenchido
+  let currentWeekday = -1; // o dia da coluna A "herda" entre linhas
 
-  dataRows.forEach((row, rowIdx) => {
+  dataRows.forEach(row => {
     const c = row.c || [];
     const diaRaw = (c[0]?.v || '').toString().trim();
     const horaRaw = c[1]?.v;
 
-    // Se há dia na coluna A, atualiza o dia corrente
+    // Atualiza dia se preenchido na coluna A
     if (diaRaw) {
       const diaNorm = normalize(diaRaw);
-      let found = -1;
-      for (const k of diasKeys) if (diaNorm.includes(k)) { found = diasMap[k]; break; }
-      if (found >= 0) currentWeekday = found;
+      for (const k of diasKeys) if (diaNorm.includes(k)) { currentWeekday = diasMap[k]; break; }
     }
 
-    if (currentWeekday < 0) return;        // ainda não temos dia
-    if (horaRaw == null || horaRaw === '') return; // linha sem horário
+    if (currentWeekday < 0) return;
+    if (horaRaw == null || horaRaw === '') return;
 
     // Normalizar horário
     let timeStr = '';
@@ -699,7 +717,7 @@ function parseCronograma(json) {
     }
     if (!timeStr) return;
 
-    // Varre colunas dos banheiros
+    // Varre cada coluna de banheiro
     for (let idx = 2; idx < c.length; idx++) {
       const cell = c[idx]?.v;
       if (cell == null || cell === '') continue;
@@ -715,7 +733,6 @@ function parseCronograma(json) {
   });
 
   console.log(`[cronograma] Parseados ${events.length} eventos`);
-  if (events.length > 0) console.log('[cronograma] Amostra:', events.slice(0,5));
   return events;
 }
 
@@ -835,7 +852,7 @@ async function fetchAll() {
 
   const [respJson, cronoJson, absences] = await Promise.all([
     fetchSheetTab(['Respostas', 'Respostas do formulário 1', 'Form Responses 1']),
-    fetchSheetTab(['cronograma', 'Cronograma', 'CRONOGRAMA']),
+    fetchCronogramaRaw(),
     fetchAbsences(),
   ]);
 
