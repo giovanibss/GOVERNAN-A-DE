@@ -91,7 +91,22 @@
     .summary-label { font-size:.65rem; color: var(--gray-500); text-transform:uppercase; letter-spacing:.08em; font-weight:500; margin-top:2px; }
 
     main { display:grid; grid-template-columns:1fr 360px; gap:1.5rem; padding:1.5rem 2rem; max-width:1500px; margin:0 auto; position:relative; z-index:5; }
-    @media(max-width:960px){ main{grid-template-columns:1fr;} }
+    @media(max-width:960px){ main{grid-template-columns:1fr; padding:1rem; gap:1rem;} }
+    @media(max-width:600px){
+      main { padding: .75rem; gap: .75rem; }
+      header { padding: 0 .75rem; height: 62px; }
+      .logo-text { font-size: .9rem; }
+      .logo-sub { font-size: .6rem; }
+      .crest { width: 42px; height: 42px; }
+      .last-update { display: none; }
+      .live-dot { font-size: .65rem; }
+      .refresh-btn, .form-btn { padding: .35rem .6rem; font-size: .65rem; }
+      .form-btn span, .refresh-btn span { display: none; }
+      .summary { padding: .75rem; gap: .5rem; }
+      .summary-card { min-width: 100px; padding: .45rem .75rem; }
+      .summary-count { font-size: 1.15rem; }
+      .summary-label { font-size: .6rem; }
+    }
 
     .section-title { font-family: var(--font-display); font-size:.72rem; font-weight:500; text-transform:uppercase; letter-spacing:.12em; color: var(--navy-600); margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
     .section-title::before { content:''; width:16px; height:2px; background: var(--gold-500); }
@@ -100,20 +115,29 @@
     .blocks-wrap > .block-card:nth-child(1) { grid-column: 1; grid-row: 1; }
     .blocks-wrap > .block-card:nth-child(2) { grid-column: 2; grid-row: 1; }
     .blocks-wrap > .block-card:nth-child(3) { grid-column: 1 / -1; grid-row: 2; }
-    @media(max-width:640px){
-      .blocks-wrap { grid-template-columns: 1fr; }
-      .blocks-wrap > .block-card { grid-column: 1; grid-row: auto; }
+    @media(max-width:760px){
+      .blocks-wrap { grid-template-columns: 1fr; gap: .75rem; }
+      .blocks-wrap > .block-card:nth-child(1),
+      .blocks-wrap > .block-card:nth-child(2),
+      .blocks-wrap > .block-card:nth-child(3) { grid-column: 1; grid-row: auto; }
     }
 
     .block-card { background: linear-gradient(180deg, white 0%, var(--navy-50) 100%); border:1px solid var(--navy-100); border-radius:10px; padding:1.25rem; position:relative; overflow:hidden; border-top: 3px solid var(--navy-600); }
+    @media(max-width:600px){ .block-card { padding: .85rem; } }
     .block-card::before { content: ''; position: absolute; top: 0; right: 0; width: 80px; height: 80px; background-image: repeating-linear-gradient(45deg, rgba(45,90,158,.04) 0 1px, transparent 1px 10px); border-radius: 0 10px 0 100%; pointer-events: none; }
-    .block-header { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; position: relative; }
+    .block-header { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; position: relative; flex-wrap: wrap; }
     .block-badge { background: var(--navy-900); color: var(--gold-400); padding: .3rem .6rem; border-radius: 4px; font-family: var(--font-display); font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; }
-    .block-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--navy-900); flex: 1; }
+    .block-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--navy-900); flex: 1; min-width: 0; }
+    @media(max-width:600px){ .block-title { font-size: .85rem; } }
     .block-count { font-family: var(--font-mono); font-size: .7rem; color: var(--gray-500); background: var(--navy-50); padding: .2rem .5rem; border-radius: 4px; border: 1px solid var(--navy-100); }
 
-    .block-scene { width: 100%; display: flex; justify-content: center; padding: .5rem 0; }
+    .block-scene { width: 100%; display: flex; justify-content: center; padding: .5rem 0; overflow-x: auto; }
     .block-scene svg { width: 100%; max-width: 680px; height: auto; display: block; }
+    /* Em telas pequenas o bloco C (Admin) é muito longo — permite scroll horizontal */
+    @media(max-width:600px){
+      .block-scene { padding: .25rem 0; }
+      .block-scene svg { min-width: 0; }
+    }
     .block-scene svg .cube { cursor: pointer; transition: transform .3s cubic-bezier(.2,.8,.2,1); animation: float 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
     .block-scene svg .cube:nth-child(2n) { animation-delay: -1.5s; }
     .block-scene svg .cube:nth-child(3n) { animation-delay: -2.5s; }
@@ -506,7 +530,6 @@ const BATHROOMS_DEF = [
 ];
 
 let bathrooms = BATHROOMS_DEF.map(b => ({ ...b, status:'no-data', lastClean:null, cleaner:'—', history:[], nextClean:null, nextType:null }));
-let cronograma = [];
 let teamAbsences = new Set(); // nomes ausentes hoje
 let selected = null;
 
@@ -524,8 +547,11 @@ function computeStatus(lastClean) {
 function buildBlockSVG(blockKey, bathroomsData) {
   const block = BLOCKS[blockKey];
   const W = block.footprint.w, H = block.footprint.h;
-  const CELL = 26;
-  const CUBE_W = 1.6, CUBE_H = 1.6, CUBE_Z = 26;
+  // CELL adaptativo: mobile usa cells menores, e o bloco admin (maior) é ainda mais reduzido
+  const isMobile = window.innerWidth <= 600;
+  let CELL = isMobile ? 18 : 26;
+  if (blockKey === 'admin' && isMobile) CELL = 14;
+  const CUBE_W = 1.6, CUBE_H = 1.6, CUBE_Z = isMobile ? 18 : 26;
   const totalW = (W + H) * 0.866 * CELL;
   const totalH = (W + H) * 0.5   * CELL + CUBE_Z + 20;
   const ox = H * 0.866 * CELL + 10;
@@ -610,137 +636,78 @@ function matchBathroomByHeader(header) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   PARSE CRONOGRAMA - ABORDAGEM SIMPLES E DIRETA
-   - Lê a aba inteira SEM tratar nada como cabeçalho (headers=0)
-   - Linha 1 = IDs (B01..B12) em C-N
-   - Linha 2 = nomes descritivos (ignorada)
-   - Linha 3+ = dados: A=dia, B=horário, C-N=tipo
+   CRONOGRAMA FIXO (embutido no código)
+   Tabela: dia da semana (1=SEG..5=SEX) → horário → tipo
    ══════════════════════════════════════════════════════════════ */
-async function fetchCronogramaRaw() {
-  const urls = [
-    // URL com headers=0 para retornar dados brutos (sem detecção de cabeçalho)
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=cronograma&headers=0`,
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Cronograma&headers=0`,
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CRONOGRAMA&headers=0`,
-  ];
-  for (const url of urls) {
-    try {
-      const res = await fetch(url);
-      const text = await res.text();
-      const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
-      if (!match) continue;
-      const candidate = JSON.parse(match[1]);
-      if (candidate?.status === 'error') continue;
-      return candidate;
-    } catch(e) {}
-  }
-  return null;
-}
-
-function parseCronograma(json) {
-  const rows = json?.table?.rows || [];
-  if (rows.length < 3) {
-    console.warn('[cronograma] Precisa ter pelo menos 3 linhas (IDs, nomes, dados)');
-    return [];
-  }
-
-  // ═══ LINHA 1 DA PLANILHA = rows[0] = IDs dos banheiros ═══
-  const headerRow = rows[0]?.c || [];
-  const headerToId = {};
-  for (let i = 2; i < headerRow.length; i++) {
-    const val = (headerRow[i]?.v || '').toString();
-    const m = val.match(/B\d{2}/i);
-    if (m) {
-      const id = m[0].toUpperCase();
-      const found = BATHROOMS_DEF.find(b => b.id.toUpperCase() === id);
-      if (found) {
-        headerToId[i] = found.id;
-      }
-    }
-  }
-
-  if (Object.keys(headerToId).length === 0) {
-    console.warn('[cronograma] Nenhum ID B0x encontrado na linha 1. Conteúdo:', headerRow.map(c => c?.v));
-    return [];
-  }
-  console.log('[cronograma] Mapeamento de colunas:', headerToId);
-
-  // ═══ PULAR LINHA 2 (nomes descritivos) → dados começam em rows[2] ═══
-  const dataRows = rows.slice(2);
-
-  const events = [];
-  const diasMap = {
-    'domingo':0, 'dom':0,
-    'segundafeira':1, 'segunda':1, 'seg':1,
-    'tercafeira':2, 'terca':2, 'ter':2,
-    'quartafeira':3, 'quarta':3, 'qua':3,
-    'quintafeira':4, 'quinta':4, 'qui':4,
-    'sextafeira':5, 'sexta':5, 'sex':5,
-    'sabado':6, 'sab':6,
-  };
-  const diasKeys = Object.keys(diasMap).sort((a,b) => b.length - a.length);
-
-  let currentWeekday = -1; // o dia da coluna A "herda" entre linhas
-
-  dataRows.forEach(row => {
-    const c = row.c || [];
-    const diaRaw = (c[0]?.v || '').toString().trim();
-    const horaRaw = c[1]?.v;
-
-    // Atualiza dia se preenchido na coluna A
-    if (diaRaw) {
-      const diaNorm = normalize(diaRaw);
-      for (const k of diasKeys) if (diaNorm.includes(k)) { currentWeekday = diasMap[k]; break; }
-    }
-
-    if (currentWeekday < 0) return;
-    if (horaRaw == null || horaRaw === '') return;
-
-    // Normalizar horário
-    let timeStr = '';
-    if (typeof horaRaw === 'string') {
-      if (horaRaw.startsWith('Date(')) {
-        const mm = horaRaw.match(/Date\(\d+,\d+,\d+,(\d+),(\d+),\d+\)/);
-        if (mm) timeStr = `${mm[1].padStart(2,'0')}:${mm[2].padStart(2,'0')}`;
-      } else {
-        const mt = horaRaw.match(/(\d{1,2})[h:.](\d{0,2})/);
-        if (mt) timeStr = `${mt[1].padStart(2,'0')}:${(mt[2]||'00').padStart(2,'0')}`;
-      }
-    } else if (typeof horaRaw === 'number') {
-      const totalMin = Math.round(horaRaw * 24 * 60);
-      const h = Math.floor(totalMin/60), m = totalMin % 60;
-      timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    } else if (typeof horaRaw === 'object' && horaRaw !== null) {
-      const h = horaRaw.hours ?? 0;
-      const m = horaRaw.minutes ?? 0;
-      timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    }
-    if (!timeStr) return;
-
-    // Varre cada coluna de banheiro
-    for (let idx = 2; idx < c.length; idx++) {
-      const cell = c[idx]?.v;
-      if (cell == null || cell === '') continue;
-      const bathId = headerToId[idx];
-      if (!bathId) continue;
-      const val = cell.toString().toLowerCase().trim();
-      let type = null;
-      if (val.includes('full')) type = 'full';
-      else if (val.includes('bas')) type = 'basica';
-      if (!type) continue;
-      events.push({ weekday: currentWeekday, time: timeStr, bathroomId: bathId, type });
-    }
-  });
-
-  console.log(`[cronograma] Parseados ${events.length} eventos`);
-  return events;
-}
+const CRONOGRAMA_FIXO = {
+  // SEGUNDA (1)
+  'B01': [ {wd:1,t:'08:10',type:'basica'}, {wd:1,t:'09:30',type:'full'}, {wd:1,t:'15:30',type:'basica'},
+           {wd:2,t:'08:10',type:'basica'}, {wd:2,t:'09:30',type:'full'}, {wd:2,t:'15:30',type:'basica'},
+           {wd:3,t:'08:10',type:'basica'}, {wd:3,t:'09:30',type:'full'}, {wd:3,t:'15:30',type:'basica'},
+           {wd:4,t:'08:10',type:'basica'}, {wd:4,t:'09:30',type:'full'}, {wd:4,t:'15:30',type:'basica'},
+           {wd:5,t:'08:10',type:'basica'}, {wd:5,t:'09:30',type:'full'}, {wd:5,t:'15:30',type:'basica'} ],
+  'B02': [ {wd:1,t:'08:10',type:'basica'}, {wd:1,t:'09:30',type:'full'}, {wd:1,t:'15:30',type:'basica'},
+           {wd:2,t:'08:10',type:'basica'}, {wd:2,t:'09:30',type:'full'}, {wd:2,t:'15:30',type:'basica'},
+           {wd:3,t:'08:10',type:'basica'}, {wd:3,t:'09:30',type:'full'}, {wd:3,t:'15:30',type:'basica'},
+           {wd:4,t:'08:10',type:'basica'}, {wd:4,t:'09:30',type:'full'}, {wd:4,t:'15:30',type:'basica'},
+           {wd:5,t:'08:10',type:'basica'}, {wd:5,t:'09:30',type:'full'}, {wd:5,t:'15:30',type:'basica'} ],
+  'B03': [ {wd:1,t:'08:30',type:'basica'},
+           {wd:2,t:'08:30',type:'basica'},
+           {wd:3,t:'08:30',type:'basica'},
+           {wd:4,t:'08:30',type:'basica'},
+           {wd:5,t:'08:30',type:'full'} ],
+  'B04': [ {wd:1,t:'08:30',type:'basica'},
+           {wd:2,t:'08:30',type:'basica'},
+           {wd:3,t:'08:30',type:'basica'},
+           {wd:4,t:'08:30',type:'basica'},
+           {wd:5,t:'08:30',type:'full'} ],
+  'B05': [ {wd:1,t:'10:30',type:'basica'},
+           {wd:2,t:'10:30',type:'full'},
+           {wd:3,t:'10:30',type:'basica'},
+           {wd:4,t:'10:30',type:'full'},
+           {wd:5,t:'10:30',type:'basica'} ],
+  'B06': [ {wd:1,t:'10:30',type:'basica'},
+           {wd:2,t:'10:30',type:'full'},
+           {wd:3,t:'10:30',type:'basica'},
+           {wd:4,t:'10:30',type:'full'},
+           {wd:5,t:'10:30',type:'basica'} ],
+  'B07': [ {wd:1,t:'10:00',type:'basica'},
+           {wd:2,t:'10:00',type:'full'},
+           {wd:3,t:'10:00',type:'basica'},
+           {wd:4,t:'10:00',type:'full'},
+           {wd:5,t:'10:00',type:'basica'} ],
+  'B08': [ {wd:1,t:'10:00',type:'basica'},
+           {wd:2,t:'10:00',type:'full'},
+           {wd:3,t:'10:00',type:'basica'},
+           {wd:4,t:'10:00',type:'full'},
+           {wd:5,t:'10:00',type:'basica'} ],
+  'B09': [ {wd:1,t:'14:00',type:'full'},
+           {wd:2,t:'14:00',type:'basica'},
+           {wd:3,t:'14:00',type:'full'},
+           {wd:4,t:'14:00',type:'basica'},
+           {wd:5,t:'14:00',type:'basica'} ],
+  'B10': [ {wd:1,t:'14:00',type:'full'},
+           {wd:2,t:'14:00',type:'basica'},
+           {wd:3,t:'14:00',type:'full'},
+           {wd:4,t:'14:00',type:'basica'},
+           {wd:5,t:'14:00',type:'basica'} ],
+  'B11': [ {wd:1,t:'14:30',type:'full'},
+           {wd:2,t:'14:30',type:'basica'},
+           {wd:3,t:'14:30',type:'full'},
+           {wd:4,t:'14:30',type:'basica'},
+           {wd:5,t:'14:30',type:'basica'} ],
+  'B12': [ {wd:1,t:'14:30',type:'full'},
+           {wd:2,t:'14:30',type:'basica'},
+           {wd:3,t:'14:30',type:'full'},
+           {wd:4,t:'14:30',type:'basica'},
+           {wd:5,t:'14:30',type:'basica'} ],
+};
 
 /* ══════════════════════════════════════════════════════════════
    PRÓXIMA LIMPEZA POR BANHEIRO
    ══════════════════════════════════════════════════════════════ */
 function computeNextCleaning(bathroomId) {
-  const relevant = cronograma.filter(e => e.bathroomId === bathroomId);
+  const relevant = CRONOGRAMA_FIXO[bathroomId] || [];
   if (!relevant.length) return null;
 
   const now = new Date();
@@ -749,10 +716,10 @@ function computeNextCleaning(bathroomId) {
 
   let best = null, bestDelta = Infinity;
   relevant.forEach(e => {
-    const [h, m] = e.time.split(':').map(Number);
+    const [h, m] = e.t.split(':').map(Number);
     if (isNaN(h) || isNaN(m)) return;
     const eventMin = h * 60 + m;
-    let daysAhead = (e.weekday - todayDay + 7) % 7;
+    let daysAhead = (e.wd - todayDay + 7) % 7;
     if (daysAhead === 0 && eventMin <= currentMin) daysAhead = 7;
     const delta = daysAhead * 24 * 60 + (eventMin - currentMin);
     if (delta < bestDelta) { bestDelta = delta; best = e; }
@@ -760,15 +727,15 @@ function computeNextCleaning(bathroomId) {
 
   if (!best) return null;
 
-  const [h, m] = best.time.split(':').map(Number);
+  const [h, m] = best.t.split(':').map(Number);
   const nextDate = new Date(now);
-  let daysAhead = (best.weekday - todayDay + 7) % 7;
+  let daysAhead = (best.wd - todayDay + 7) % 7;
   const eventMin = h*60 + m;
   if (daysAhead === 0 && eventMin <= currentMin) daysAhead = 7;
   nextDate.setDate(now.getDate() + daysAhead);
   nextDate.setHours(h, m, 0, 0);
 
-  return { date: nextDate, weekday: best.weekday, time: best.time, type: best.type };
+  return { date: nextDate, weekday: best.wd, time: best.t, type: best.type };
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -850,15 +817,14 @@ async function fetchAll() {
   setBanner('loading', 'Sincronizando dados…');
   setRefreshSpinning(true);
 
-  const [respJson, cronoJson, absences] = await Promise.all([
+  const [respJson, absences] = await Promise.all([
     fetchSheetTab(['Respostas', 'Respostas do formulário 1', 'Form Responses 1']),
-    fetchCronogramaRaw(),
     fetchAbsences(),
   ]);
 
   teamAbsences = absences;
 
-  if (!respJson && !cronoJson) {
+  if (!respJson) {
     setBanner('error', '⚠️ Não foi possível ler a planilha. Verifique o compartilhamento.');
     setRefreshSpinning(false);
     renderTeam();
@@ -867,7 +833,6 @@ async function fetchAll() {
 
   try {
     const histMap = respJson ? parseRespostas(respJson) : {};
-    cronograma = cronoJson ? parseCronograma(cronoJson) : [];
 
     bathrooms = BATHROOMS_DEF.map(def => {
       const hist = (histMap[def.id] || []).sort((a,b) => b.time - a.time);
@@ -1096,6 +1061,13 @@ renderTeam(); // render inicial sem dados
 fetchAll();
 setInterval(fetchAll, REFRESH_MS);
 setInterval(updateClock, 1000);
+
+// Rebuild cubes quando a tela for redimensionada (para mobile/desktop)
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { buildAllBlocks(); }, 200);
+});
 </script>
 </body>
 </html>
