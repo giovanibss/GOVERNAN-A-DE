@@ -16,6 +16,7 @@
       --green-500:#10b981; --green-400:#34d399;
       --yellow-500:#f59e0b; --yellow-400:#fbbf24;
       --red-500:#ef4444; --red-400:#f87171;
+      --magenta-500:#c026d3; --magenta-400:#d946ef; --magenta-100:#fae8ff;
       --purple-500:#8b5cf6; --purple-100:#ede9fe;
       --gray-100:#f1f5f9; --gray-200:#e2e8f0; --gray-300:#cbd5e1;
       --gray-400:#94a3b8; --gray-500:#64748b; --gray-700:#334155; --gray-900:#0f172a;
@@ -85,6 +86,7 @@
     .summary-card.green  { border-left-color: var(--green-500); }
     .summary-card.yellow { border-left-color: var(--yellow-500); }
     .summary-card.red    { border-left-color: var(--red-500); }
+    .summary-card.magenta { border-left-color: var(--magenta-500); }
     .summary-card.gray   { border-left-color: var(--gray-400); }
     .summary-card.gold   { border-left-color: var(--gold-500); margin-left:auto; }
     .summary-count { font-family: var(--font-display); font-size:1.5rem; font-weight:600; line-height:1; color: var(--navy-900); }
@@ -207,14 +209,14 @@
     .detail-icon-wrap { width:48px; height:48px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; border:2px solid; }
     .detail-icon-wrap.clean   { background: rgba(16,185,129,.15); border-color: var(--green-500); }
     .detail-icon-wrap.warning { background: rgba(245,158,11,.15); border-color: var(--yellow-500); }
-    .detail-icon-wrap.dirty   { background: rgba(239,68,68,.15); border-color: var(--red-500); }
+    .detail-icon-wrap.overdue { background: rgba(192,38,211,.15); border-color: var(--magenta-500); }
     .detail-icon-wrap.no-data { background: var(--gray-100); border-color: var(--gray-400); }
     .detail-name { font-family: var(--font-display); font-size:1rem; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color: var(--navy-900); line-height:1.2; }
     .detail-loc { font-size:.68rem; color: var(--gray-500); letter-spacing:.04em; text-transform:uppercase; margin-top:3px; }
     .status-badge { display:inline-flex; align-items:center; gap:.4rem; padding:.3rem .8rem; border-radius:4px; font-size:.7rem; font-weight:600; margin-bottom:1rem; text-transform:uppercase; letter-spacing:.08em; font-family: var(--font-display); }
     .status-badge.clean   { background:rgba(16,185,129,.12); color:#047857; }
     .status-badge.warning { background:rgba(245,158,11,.12); color:#92400e; }
-    .status-badge.dirty   { background:rgba(239,68,68,.12); color:#991b1b; }
+    .status-badge.overdue { background:rgba(192,38,211,.12); color:#86198f; }
     .status-badge.no-data { background:var(--gray-100); color:var(--gray-500); }
 
     .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:.55rem; }
@@ -337,7 +339,7 @@
     </div>
   </div>
   <div class="header-right">
-    <a class="form-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSc-QTHe_dOmTYsqOe8CRrQ8APXBud57piHplNWC71Xy0c0gOg/viewform" target="_blank">
+    <a class="form-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdkPhb72gisDR71cnY2WGRUG51L_F5ShUE_MTop46ecYhi9ZA/viewform" target="_blank">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
       Registrar Limpeza
     </a>
@@ -363,8 +365,8 @@
   <div>
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:#10b981;color:#10b981"></div>Operacional</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;color:#f59e0b"></div>Atenção</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#ef4444;color:#ef4444"></div>Crítico</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;color:#f59e0b"></div>Atenção (vencido)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c026d3;color:#c026d3"></div>Vencido &gt; 8h</div>
       <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;color:#94a3b8"></div>Sem Registro</div>
     </div>
 
@@ -402,7 +404,7 @@
   </div>
 
   <div class="sidebar">
-    <a class="register-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSc-QTHe_dOmTYsqOe8CRrQ8APXBud57piHplNWC71Xy0c0gOg/viewform" target="_blank">
+    <a class="register-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSdkPhb72gisDR71cnY2WGRUG51L_F5ShUE_MTop46ecYhi9ZA/viewform" target="_blank">
       <div class="register-cta-icon"><img src="assets/cocar-fab.png" alt="" /></div>
       <div class="register-cta-text">
         <div class="register-cta-title">Registrar Limpeza</div>
@@ -512,10 +514,10 @@ const BLOCKS = {
     footprint: { w: 16, h: 7 },
     bathrooms: [
       { id:'B05', name:'Hall Central DE Fem',         shortName:'DE Fem',    icon:'🚺', location:'Prédio Adm — Hall Central', gx:2, gy:1 },
-      { id:'B06', name:'Hall Central DE Of Sup Masc', shortName:'Of Sup',    icon:'🚹', location:'Prédio Adm — Hall Central', gx:2, gy:3 },
+      { id:'B06', name:'Hall Central DE Of Sup Masc', shortName:'Of Sup',    icon:'⭐', location:'Prédio Adm — Hall Central', gx:2, gy:3 },
       { id:'B07', name:'Hall Central Prof Fem',       shortName:'Prof F',    icon:'🚺', location:'Prédio Adm — Hall Central', gx:4, gy:1 },
       { id:'B08', name:'Hall Central Prof Masc',      shortName:'Prof M',    icon:'🚹', location:'Prédio Adm — Hall Central', gx:4, gy:3 },
-      { id:'B09', name:'Corredor DE Of Masc',         shortName:'Of M',      icon:'🚹', location:'Prédio Adm — Corredor',     gx:11, gy:1 },
+      { id:'B09', name:'Corredor DE Of Masc',         shortName:'Of M',      icon:'⭐', location:'Prédio Adm — Corredor',     gx:11, gy:1 },
       { id:'B10', name:'Corredor DE Grad Masc',       shortName:'Grad M',    icon:'🚹', location:'Prédio Adm — Corredor',     gx:11, gy:3 },
       { id:'B11', name:'Corredor DE Of Fem',          shortName:'Of F',      icon:'🚺', location:'Prédio Adm — Corredor',     gx:13, gy:1 },
       { id:'B12', name:'Corredor DE Grad Fem',        shortName:'Grad F',    icon:'🚺', location:'Prédio Adm — Corredor',     gx:13, gy:3 },
@@ -533,12 +535,19 @@ let bathrooms = BATHROOMS_DEF.map(b => ({ ...b, status:'no-data', lastClean:null
 let teamAbsences = new Set(); // nomes ausentes hoje
 let selected = null;
 
-function computeStatus(lastClean) {
+function computeStatus(lastClean, lastType) {
   if (!lastClean) return 'no-data';
-  const mins = (Date.now() - lastClean.getTime()) / 60000;
-  if (mins < 180) return 'clean';
-  if (mins < 300) return 'warning';
-  return 'dirty';
+  const hours = (Date.now() - lastClean.getTime()) / (60 * 60 * 1000);
+
+  // Janela "operacional" (verde) depende do tipo:
+  //   - full:   8 horas
+  //   - básica: 3 horas
+  //   - se tipo desconhecido, assume básica (mais conservador)
+  const greenWindow = lastType === 'full' ? 8 : 3;
+
+  if (hours < greenWindow) return 'clean';       // verde - dentro do prazo
+  if (hours < greenWindow + 8) return 'warning'; // amarelo - venceu (até 8h após)
+  return 'overdue';                              // magenta - vencido há mais de 8h
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -566,7 +575,7 @@ function buildBlockSVG(blockKey, bathroomsData) {
     const colors = {
       clean:   { top:'rgba(16,185,129,.5)',  left:'rgba(16,185,129,.75)',  right:'rgba(16,185,129,.6)',  stroke:'#10b981' },
       warning: { top:'rgba(245,158,11,.5)',  left:'rgba(245,158,11,.75)',  right:'rgba(245,158,11,.6)',  stroke:'#f59e0b' },
-      dirty:   { top:'rgba(239,68,68,.5)',   left:'rgba(239,68,68,.75)',   right:'rgba(239,68,68,.6)',   stroke:'#ef4444' },
+      overdue: { top:'rgba(192,38,211,.5)',  left:'rgba(192,38,211,.75)',  right:'rgba(192,38,211,.6)',  stroke:'#c026d3' },
       'no-data': { top:'rgba(148,163,184,.4)', left:'rgba(148,163,184,.65)', right:'rgba(148,163,184,.55)', stroke:'#94a3b8' }
     }[status];
     const cx = (At.x + Ct.x) / 2, cy = (At.y + Ct.y) / 2;
@@ -748,10 +757,31 @@ function parseRespostas(json) {
 
   rows.forEach(row => {
     const c = row.c || [];
+    // Estrutura nova do Forms:
+    // A: timestamp | B: banheiro | C: tipo de limpeza | D: responsável | E: observações
+    // Suporta também a estrutura antiga (sem coluna C) para compatibilidade
     const tsRaw = c[0]?.v;
     const bathField = c[1]?.v?.toString() || '';
-    const who   = c[2]?.v || '—';
-    const obs   = c[3]?.v || '';
+    const colC = c[2]?.v?.toString() || '';
+    const colD = c[3]?.v?.toString() || '';
+    const colE = c[4]?.v?.toString() || '';
+
+    // Detecta se a coluna C é tipo de limpeza ou responsável (compatibilidade)
+    let cleaningType = null;
+    let who = '—';
+    let obs = '';
+    const cLower = colC.toLowerCase().trim();
+    if (cLower === 'básica' || cLower === 'basica' || cLower === 'full') {
+      // Estrutura nova: C=tipo, D=resp, E=obs
+      cleaningType = cLower.startsWith('full') ? 'full' : 'basica';
+      who = colD || '—';
+      obs = colE || '';
+    } else {
+      // Estrutura antiga: C=resp, D=obs
+      who = colC || '—';
+      obs = colD || '';
+    }
+
     if (!bathField || !tsRaw) return;
     const idMatch = bathField.match(/^(B\d{2})/i);
     if (!idMatch) return;
@@ -766,7 +796,18 @@ function parseRespostas(json) {
     }
     if (!dt || isNaN(dt)) return;
     if (!histMap[bid]) return;
-    histMap[bid].push({ time: dt, who, label: obs || 'Limpeza registrada' });
+
+    const typeLabel = cleaningType === 'full' ? 'Limpeza Full' :
+                      cleaningType === 'basica' ? 'Limpeza Básica' :
+                      (obs || 'Limpeza registrada');
+
+    histMap[bid].push({
+      time: dt,
+      who,
+      label: typeLabel,
+      cleaningType,  // 'full', 'basica' ou null
+      obs,
+    });
   });
 
   return histMap;
@@ -840,8 +881,9 @@ async function fetchAll() {
       const next = computeNextCleaning(def.id);
       return {
         ...def,
-        status:    computeStatus(last?.time || null),
+        status:    computeStatus(last?.time || null, last?.cleaningType),
         lastClean: last?.time || null,
+        lastType:  last?.cleaningType || null,
         cleaner:   last?.who  || '—',
         history:   hist.slice(0,5),
         nextClean: next?.date || null,
@@ -888,12 +930,12 @@ function renderTeam() {
 }
 
 function buildSummary() {
-  const c = { clean:0, warning:0, dirty:0, 'no-data':0 };
+  const c = { clean:0, warning:0, overdue:0, 'no-data':0 };
   bathrooms.forEach(b => c[b.status]++);
   document.getElementById('summary-bar').innerHTML = `
     <div class="summary-card green"><div><div class="summary-count">${c.clean}</div><div class="summary-label">Operacionais</div></div></div>
     <div class="summary-card yellow"><div><div class="summary-count">${c.warning}</div><div class="summary-label">Atenção</div></div></div>
-    <div class="summary-card red"><div><div class="summary-count">${c.dirty}</div><div class="summary-label">Críticos</div></div></div>
+    <div class="summary-card magenta"><div><div class="summary-count">${c.overdue}</div><div class="summary-label">Vencidos (&gt;8h)</div></div></div>
     <div class="summary-card gray"><div><div class="summary-count">${c['no-data']}</div><div class="summary-label">Sem Registro</div></div></div>
     <div class="summary-card gold"><div><div class="summary-count">${bathrooms.length}</div><div class="summary-label">Total</div></div></div>
   `;
@@ -1003,7 +1045,7 @@ function renderDetail(b) {
       <div class="info-item">
         <div class="info-item-label">Última Limpeza</div>
         <div class="info-item-value">${b.lastClean ? fmt(b.lastClean) : '—'}</div>
-        <div class="info-item-sub">${b.lastClean ? fmtAgo(b.lastClean) : 'Sem registro'}</div>
+        <div class="info-item-sub">${b.lastClean ? fmtAgo(b.lastClean) : 'Sem registro'}${b.lastType ? ' · ' + (b.lastType === 'full' ? 'Full' : 'Básica') : ''}</div>
       </div>
       <div class="info-item">
         <div class="info-item-label">Próxima Prev.</div>
@@ -1025,8 +1067,8 @@ function renderDetail(b) {
 /* ══════════════════════════════════════════════════════════════
    HELPERS
    ══════════════════════════════════════════════════════════════ */
-const statusLabel = s => ({ clean:'Operacional', warning:'Atenção', dirty:'Requer Limpeza', 'no-data':'Sem Registro' }[s] || '—');
-const statusColor = s => ({ clean:'#10b981', warning:'#f59e0b', dirty:'#ef4444', 'no-data':'#94a3b8' }[s] || '#94a3b8');
+const statusLabel = s => ({ clean:'Operacional', warning:'Atenção', overdue:'Vencido +8h', 'no-data':'Sem Registro' }[s] || '—');
+const statusColor = s => ({ clean:'#10b981', warning:'#f59e0b', overdue:'#c026d3', 'no-data':'#94a3b8' }[s] || '#94a3b8');
 const fmt     = d => d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 const fmtAgo  = d => { const m=Math.round((Date.now()-d)/60000); return m<1?'agora mesmo':m<60?`${m} min atrás`:`${Math.floor(m/60)}h ${m%60}min atrás`; };
 const fmtNext = d => {
